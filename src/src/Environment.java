@@ -234,7 +234,7 @@ public class Environment extends Application {
 
                     // add the goal to the grid of nodes
                     grid_nodes[i][j] = goal_node;
-                    
+
                     // add the goal to the grid
                     grid.add(goal, j, i);
                 }
@@ -257,8 +257,6 @@ public class Environment extends Application {
             }
         }
 
-//        ImageView finalRoadrunner = roadrunner;
-
         //create Enable 8 Direction button
         Button toggleDirection = new Button();
         toggleDirection.setText("Enable 8 Direction");
@@ -268,10 +266,12 @@ public class Environment extends Application {
             public void handle(ActionEvent event) {
                 clicks += 1;
 
+                // check if button has been clicked an odd number of times and change the enable_8 state to true and enable access to 8 directional movement
                 if (clicks % 2 == 1){
                     enable_8 = true;
                     toggleDirection.setText("Disable 8 Direction");
                 }
+                // set the state to false and only allow 4 directional movement
                 else{
                     enable_8 = false;
                     toggleDirection.setText("Enable 8 Direction");
@@ -279,9 +279,12 @@ public class Environment extends Application {
             }
         });
 
+        // create buttons to undo, redo and reset
         Button undo = new Button("Undo");
         Button redo = new Button("Redo");
         Button reset = new Button("Reset");
+
+        // create a label to display the score
         Label score_label = new Label("SCORE: " + score);
 
         undo.setOnAction(new EventHandler<ActionEvent>() {
