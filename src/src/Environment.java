@@ -23,18 +23,44 @@ import java.util.Stack;
 public class Environment extends Application {
     // variable to keep track whether the user has enabled 8 directions
     boolean enable_8 = false;
+
+    // check how many times the user has clicked the toggleDirection button
     int clicks = 0;
+
+    // check how many times the undo button been clicked
     static int count_undos = 0;
+
+    // list to store all positions [x, y] that the user has visited
     ArrayList<int[]> visited_cells = new ArrayList<>();
+
+    // stack to keep track of the last recent moves
     Stack<int[]> recent_moves = new Stack<>();
+
+    // stack to keep track of any recent undone moves
     Stack<int[]> redo_recent_moves = new Stack<>();
-    String[] recent_action = {null};
+
+    // variable to keep track of the user's last action
+    String recent_action = null;
+
+    // variable to keep track of the user's score
     int score = 0;
+
+    // keep track of the runner
     ImageView roadrunner = null;
+
+    //keep track of the goal
     ImageView goal;
+
+    // create a runner node to keep track of it
     Node runner = null;
+
+    //track the goal node
     Node goal_node;
+
+    //list of arrays to store the input file's contents
     ArrayList<int[]> environ_map;
+
+    // array of array to store the gird nodes
     Node[][] grid_nodes;
 
 
@@ -46,6 +72,7 @@ public class Environment extends Application {
         String line;
         ArrayList<int[]> environmentMap = new ArrayList<>();
 
+        //split the new line at a new space and convert into an array
         String[] line1 = bufferedReader.readLine().split(" ");
 
         //convert the String array to an array of inegers
@@ -133,13 +160,16 @@ public class Environment extends Application {
         return images_alt_dict;
     }
 
+    // funtion to find the runner's x position in the grid
     public static int getRunner_Xpos(ImageView runner){
         return GridPane.getRowIndex(runner);
     }
 
+    // funtion to find the runner's y position in the grid
     public static int getRunner_Ypos(ImageView runner){
         return GridPane.getColumnIndex(runner);
     }
+
 
     public static void main(String[] args) throws IOException {
         launch(args);
@@ -149,9 +179,16 @@ public class Environment extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Road Runner Simulation");
 
+        // read and store contents of the file in an arraylist of arrays
         environ_map = readfile("C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\sample_test_input.txt");
+
+        // create a hashmap of the original images
         HashMap<Integer,Image> image_dict = get_images();
+
+        // create a hashmap of the alternate images
         HashMap<Integer,Image> image_alt_dict = get_alt_images();
+
+        // initialize the grid nodes array and make it as big as the map
         grid_nodes = new Node[environ_map.size()][environ_map.get(1).length];
 
 
@@ -164,53 +201,58 @@ public class Environment extends Application {
         //create ImageViews for each image, resize them then add them to the grid at the appropriate position
         for(int i=0; i < environ_map.size(); i++){
             for(int j=0; j < environ_map.get(i).length; j++){
+
+                // check if the map value represents the start position. If so, put the runner at the start position
                 if(environ_map.get(i)[j] == 8){
+                    // initialize the runner imageview object
                     roadrunner = new ImageView(image_dict.get(7));
                     roadrunner.setFitHeight(100);
                     roadrunner.setFitWidth(100);
+
+                    // initialize the runner node object
                     runner = new Node(roadrunner);
+
+                    // add the runner to the grid nodes
                     grid_nodes[i][j] = runner;
+
+                    // add the runner's start position to the visited cells list
                     visited_cells.add(new int[]{i, j});
+
+                    // add the runner to the grid
                     grid.add(roadrunner, j, i);
                 }
+
+                //check if the map value reps the goal position
                 else if(environ_map.get(i)[j] == 9){
+                    // initialize the goal object
                     goal = new ImageView(image_dict.get(9));
                     goal.setFitWidth(100);
                     goal.setFitHeight(100);
+
+                    // initialize the goal node object
                     goal_node = new Node(goal);
+
+                    // add the goal to the grid of nodes
                     grid_nodes[i][j] = goal_node;
+                    
+                    // add the goal to the grid
                     grid.add(goal, j, i);
                 }
 
                 else{
+                    // create a new image view of the image using the image dict hashmap
                     ImageView image = new ImageView(image_dict.get(environ_map.get(i)[j]));
                     image.setFitHeight(100);
                     image.setFitWidth(100);
+
+                    // create a node object of the image
                     Node image_node = new Node(image);
+
+                    // add the node object to the grid nodes
                     grid_nodes[i][j] = image_node;
+
+                    // add the image to the grid
                     grid.add(image, j, i);
-
-//                    switch (environ_map.get(i)[j]) {
-//                        case 0:
-//                            grid_nodes[i][j].setgScore(-1);
-//                            break;
-//                        case 2:
-//                            grid_nodes[i][j].setgScore(-2);
-//                            break;
-//                        case 3:
-//                            grid_nodes[i][j].setgScore(-4);
-//                            break;
-//                        case 4:
-//                            grid_nodes[i][j].setgScore(-8);
-//                            break;
-//                        case 5:
-//                            grid_nodes[i][j].setgScore(1);
-//                            break;
-//                        case 6:
-//                            grid_nodes[i][j].setgScore(5);
-//                            break;
-//                    }
-
                 }
             }
         }
@@ -248,7 +290,7 @@ public class Environment extends Application {
                 if(recent_moves.size() >= 1) {
                     int[] undone_move = undo_move(grid, recent_moves, roadrunner, image_dict, environ_map, visited_cells);
                     redo_recent_moves.push(undone_move);
-                    recent_action[0] = "undo";
+                    recent_action = "undo";
                     count_undos += 1;
 
                     if (count_undos == 3) {
@@ -295,7 +337,7 @@ public class Environment extends Application {
             public void handle(ActionEvent event) {
                 int[] redone = null;
 
-                if (recent_action[0].equals("undo")) {
+                if (recent_action.equals("undo")) {
                     if (redo_recent_moves.size() >= 1) {
                         redone = redo_move(grid, redo_recent_moves, roadrunner, image_alt_dict, environ_map, visited_cells);
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
@@ -310,28 +352,28 @@ public class Environment extends Application {
                         System.out.println("Cannot Redo");
                     }
 
-                } else if (recent_action[0].equals("up")) {
+                } else if (recent_action.equals("up")) {
                     undo.setDisable(false);
                     redone = Runner_Movement.moveUp(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                         visited_cells.add(redone);
                     }
-                } else if (recent_action[0].equals("down")) {
+                } else if (recent_action.equals("down")) {
                     undo.setDisable(false);
                     redone = Runner_Movement.moveDown(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                         visited_cells.add(redone);
                     }
-                } else if (recent_action[0].equals("left")) {
+                } else if (recent_action.equals("left")) {
                     undo.setDisable(false);
                     redone = Runner_Movement.moveLeft(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                         visited_cells.add(redone);
                     }
-                } else if (recent_action[0].equals("right")) {
+                } else if (recent_action.equals("right")) {
                     undo.setDisable(false);
                     redone = Runner_Movement.moveRight(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
                     if (redone != null) {
@@ -339,7 +381,7 @@ public class Environment extends Application {
                         visited_cells.add(redone);
                     }
                 }
-                else if(recent_action[0].equals("north east")){
+                else if(recent_action.equals("north east")){
                     undo.setDisable(false);
                     redone = Runner_Movement.moveNorthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
                     if (redone != null) {
@@ -348,7 +390,7 @@ public class Environment extends Application {
                     }
                 }
 
-                else if(recent_action[0].equals("south east")){
+                else if(recent_action.equals("south east")){
                     undo.setDisable(false);
                     redone = Runner_Movement.moveSouthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
                     if (redone != null) {
@@ -357,7 +399,7 @@ public class Environment extends Application {
                     }
                 }
 
-                else if(recent_action[0].equals("north west")){
+                else if(recent_action.equals("north west")){
                     undo.setDisable(false);
                     redone = Runner_Movement.moveNorthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
                     if (redone != null) {
@@ -366,7 +408,7 @@ public class Environment extends Application {
                     }
                 }
 
-                else if(recent_action[0].equals("south west")){
+                else if(recent_action.equals("south west")){
                     undo.setDisable(false);
                     redone = Runner_Movement.moveSouthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
                     if (redone != null) {
@@ -408,7 +450,7 @@ public class Environment extends Application {
                 visited_cells = new ArrayList<>();
                 recent_moves = new Stack<>();
                 redo_recent_moves = new Stack<>();
-                recent_action = new String[]{null};
+                recent_action = null;
                 score = 0;
                 grid.getChildren().removeAll();
 
@@ -469,7 +511,7 @@ public class Environment extends Application {
                     if(new_pos != null){
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                         visited_cells.add(new_pos);
-                        recent_action[0] = "up";
+                        recent_action = "up";
                    }
                     A_Star.A_StarSearch_4D(grid_nodes, runner, goal_node, image_dict);
 //                    A_Star.A_StarSearch_8D(grid_nodes, runner, goal_node, image_dict);
@@ -485,7 +527,7 @@ public class Environment extends Application {
                     if(new_pos != null){
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                         visited_cells.add(new_pos);
-                        recent_action[0] = "down";
+                        recent_action = "down";
                     }
                 }
                 else if(event.getCode() == KeyCode.LEFT){
@@ -497,7 +539,7 @@ public class Environment extends Application {
                     if(new_pos != null){
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                         visited_cells.add(new_pos);
-                        recent_action[0] = "left";
+                        recent_action = "left";
                     }
                 }
                 else if(event.getCode() == KeyCode.RIGHT){
@@ -509,7 +551,7 @@ public class Environment extends Application {
                     if(new_pos != null){
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                         visited_cells.add(new_pos);
-                        recent_action[0] = "right";
+                        recent_action = "right";
                     }
                 }
 
@@ -523,7 +565,7 @@ public class Environment extends Application {
                         if(new_pos != null){
                             recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                             visited_cells.add(new_pos);
-                            recent_action[0] = "north east";
+                            recent_action = "north east";
                         }
                     }
                     else if(event.getCode() == KeyCode.S){
@@ -535,7 +577,7 @@ public class Environment extends Application {
                         if(new_pos != null){
                             recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                             visited_cells.add(new_pos);
-                            recent_action[0] = "south east";
+                            recent_action = "south east";
                         }
                     }
                     else if(event.getCode() == KeyCode.Q){
@@ -547,7 +589,7 @@ public class Environment extends Application {
                         if(new_pos != null){
                             recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                             visited_cells.add(new_pos);
-                            recent_action[0] = "north west";
+                            recent_action = "north west";
                         }
                     }
                     else if(event.getCode() == KeyCode.A){
@@ -559,7 +601,7 @@ public class Environment extends Application {
                         if(new_pos != null){
                             recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                             visited_cells.add(new_pos);
-                            recent_action[0] = "south west";
+                            recent_action = "south west";
                         }
                     }
                 }
