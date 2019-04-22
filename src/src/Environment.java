@@ -287,7 +287,7 @@ public class Environment extends Application {
         // create a label to display the score
         Label score_label = new Label("SCORE: " + score);
 
-
+        // define what happens when the undo button is clicked
         undo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -333,11 +333,13 @@ public class Environment extends Application {
                             score -= 5;
                             break;
                     }
+                    // update the score label with the new scores
                     score_label.setText("SCORE: " + score);
 
                 }
 
-                if(recent_moves.size() == 0){
+                // if the recent moves stack is empty, disable the undo button
+                if(recent_moves.isEmpty()){
                     System.out.println("Cannot Undo Further");
                     undo.setDisable(true);
                 }
@@ -345,28 +347,42 @@ public class Environment extends Application {
             }
         });
 
+        // define what happens when the redo button is clicked
         redo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             @SuppressWarnings("Duplicates")
             public void handle(ActionEvent event) {
+                // array to store the recently redone move
                 int[] redone = null;
 
+                // check what was the recent action the user did.
+                // if the action was an undo, then redo the undone move
                 if (recent_action.equals("undo")) {
-                    if (redo_recent_moves.size() >= 1) {
+
+                    // check that the redo recent moves stack is not empty
+                    if (!redo_recent_moves.isEmpty()) {
+                        // store the redone move in an array
                         redone = redo_move(grid, redo_recent_moves, roadrunner, image_alt_dict, environ_map, visited_cells);
+
+                        // add it to the recent moves stack
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+
+                        // enable the undo button
                         undo.setDisable(false);
 
-                        if (redo_recent_moves.size() == 0) {
+                        // check if redo recent moves is empty. if so disable the redo button
+                        if (redo_recent_moves.isEmpty()) {
                             redo.setDisable(true);
                         }
                     }
+                    // if empty, display a warning
                     else {
-
                         System.out.println("Cannot Redo");
                     }
 
-                } else if (recent_action.equals("up")) {
+                }
+                // if the last action was move up, redo the move up action
+                else if (recent_action.equals("up")) {
                     undo.setDisable(false);
                     redone = Runner_Movement.moveUp(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
                     if (redone != null) {
@@ -431,26 +447,30 @@ public class Environment extends Application {
                     }
                 }
 
-                switch (environ_map.get(redone[0])[redone[1]]) {
-                    case 0:
-                        score -= 1;
-                        break;
-                    case 2:
-                        score -= 2;
-                        break;
-                    case 3:
-                        score -= 4;
-                        break;
-                    case 4:
-                        score -= 8;
-                        break;
-                    case 5:
-                        score += 1;
-                        break;
-                    case 6:
-                        score += 5;
-                        break;
+                if(redone != null){
+
+                    switch (environ_map.get(redone[0])[redone[1]]) {
+                        case 0:
+                            score -= 1;
+                            break;
+                        case 2:
+                            score -= 2;
+                            break;
+                        case 3:
+                            score -= 4;
+                            break;
+                        case 4:
+                            score -= 8;
+                            break;
+                        case 5:
+                            score += 1;
+                            break;
+                        case 6:
+                            score += 5;
+                            break;
+                    }
                 }
+
                 score_label.setText("SCORE: " + score);
             }
         });
