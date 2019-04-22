@@ -287,21 +287,32 @@ public class Environment extends Application {
         // create a label to display the score
         Label score_label = new Label("SCORE: " + score);
 
+
         undo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if(recent_moves.size() >= 1) {
+                // check if the recent moves stack is not empty before undoing a move
+                if(!recent_moves.isEmpty()) {
+                    // store the coordinates of the undone move and store them in an array
                     int[] undone_move = undo_move(grid, recent_moves, roadrunner, image_dict, environ_map, visited_cells);
+
+                    // add the undone move to the redo recent moves stack
                     redo_recent_moves.push(undone_move);
+
+                    // store the recent action to the recent action variable
                     recent_action = "undo";
+
+                    // increment the number of undos done so far
                     count_undos += 1;
 
+                    //check if there has been 3 undos. If so disable the undo button and enable the undo button
                     if (count_undos == 3) {
                         undo.setDisable(true);
-                        redo.setDisable(false);
+//                        redo.setDisable(false);
                         System.out.println("No Legal Undos left");
                     }
 
+                    // undo the scores by reversing them.
                     switch (environ_map.get(undone_move[0])[undone_move[1]]) {
                         case 0:
                             score += 1;
