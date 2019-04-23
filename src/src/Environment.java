@@ -60,7 +60,7 @@ public class Environment extends Application {
     //list of arrays to store the input file's contents
     ArrayList<int[]> environ_map;
 
-    // array of array to store the gird nodes
+    // array of array to store the grid nodes
     Node[][] grid_nodes;
 
 
@@ -447,8 +447,8 @@ public class Environment extends Application {
                     }
                 }
 
+                // check to ensure the redone move is not null before updating the scores
                 if(redone != null){
-
                     switch (environ_map.get(redone[0])[redone[1]]) {
                         case 0:
                             score -= 1;
@@ -475,9 +475,11 @@ public class Environment extends Application {
             }
         });
 
+        // define what happens when the reset button is clicked
         reset.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                // reset the member variables of the environment
                 roadrunner = null;
                 enable_8 = false;
                 count_undos = 0;
@@ -487,9 +489,11 @@ public class Environment extends Application {
                 recent_action = null;
                 score = 0;
                 grid.getChildren().removeAll();
+                grid_nodes = new Node[environ_map.size()][environ_map.get(1).length];
 
                 score_label.setText("Score: " + score);
 
+                // repopulate the grid again and update the runner, goal and other images
                 for(int i=0; i < environ_map.size(); i++){
                     for(int j=0; j < environ_map.get(i).length; j++){
                         if(environ_map.get(i)[j] == 8){
@@ -498,6 +502,14 @@ public class Environment extends Application {
                             roadrunner.setFitWidth(100);
                             visited_cells.add(new int[]{i, j});
                             grid.add(roadrunner, j, i);
+                        }
+                        else if(environ_map.get(i)[j] == 9){
+                            goal = new ImageView(image_dict.get(9));
+                            goal.setFitWidth(100);
+                            goal.setFitHeight(100);
+                            goal_node = new Node(goal);
+                            grid_nodes[i][j] = goal_node;
+                            grid.add(goal, j, i);
                         }
                         else{
                             ImageView image = new ImageView(image_dict.get(environ_map.get(i)[j]));
@@ -529,22 +541,34 @@ public class Environment extends Application {
         //create a scene and add it to the stage
         Scene scene = new Scene(borderPane, 800, 700);
 
-
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             @SuppressWarnings("Duplicates")
             public void handle(KeyEvent event) {
+                // array to store the new position of the runner
                 int[] new_pos = null;
 
+                // if UP key is pressed
                 if(event.getCode() == KeyCode.UP){
+                    // if the user has already undone some moves, reduce the possible number of undos they can make by one
                     if(count_undos > 0){
                         count_undos -= 1;
                     }
+                    // enable the undo button
                     undo.setDisable(false);
+
+                    // store the runner's new position in an array
                     new_pos = Runner_Movement.moveUp(grid, roadrunner, image_alt_dict, environ_map, visited_cells);
+
+                    // if the new position is not null, i.e the runner moved despite the restrictions set in the upward movement
                     if(new_pos != null){
+                        // add his last position to the recent moves
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+
+                        // add his new position in the visited cells
                         visited_cells.add(new_pos);
+
+                        // update the user's last action to be move up
                         recent_action = "up";
                    }
                     A_Star.A_StarSearch_4D(grid_nodes, runner, goal_node, image_dict);
@@ -552,6 +576,7 @@ public class Environment extends Application {
 
 //                    Dijkstras.Dijkstras_Search_4D(grid_nodes, runner, goal_node, image_dict);
                 }
+                // check if key pressed is DOWN and move runner down. update the recent moves stack, the visited cells list and recent action
                 else if(event.getCode() == KeyCode.DOWN){
                     if(count_undos > 0){
                         count_undos -= 1;
@@ -564,6 +589,7 @@ public class Environment extends Application {
                         recent_action = "down";
                     }
                 }
+                // check if key pressed is LEFT and move runner left. update the recent moves stack, the visited cells list and recent action
                 else if(event.getCode() == KeyCode.LEFT){
                     if(count_undos > 0){
                         count_undos -= 1;
@@ -576,6 +602,7 @@ public class Environment extends Application {
                         recent_action = "left";
                     }
                 }
+                // check if key pressed is RIGHT and move runner right. update the recent moves stack, the visited cells list and recent action
                 else if(event.getCode() == KeyCode.RIGHT){
                     if(count_undos > 0){
                         count_undos -= 1;
@@ -589,7 +616,9 @@ public class Environment extends Application {
                     }
                 }
 
+                // check if the user has enabled 8 directional movement, if so check which diagonal direction the user wants to move
                 if(enable_8){
+                    // check if key pressed is W and move runner north east. update the recent moves stack, the visited cells list and recent action
                     if(event.getCode() == KeyCode.W){
                         if(count_undos > 0){
                             count_undos -= 1;
@@ -602,6 +631,7 @@ public class Environment extends Application {
                             recent_action = "north east";
                         }
                     }
+                    // check if key pressed is S and move runner south east. update the recent moves stack, the visited cells list and recent action
                     else if(event.getCode() == KeyCode.S){
                         if(count_undos > 0){
                             count_undos -= 1;
@@ -614,6 +644,7 @@ public class Environment extends Application {
                             recent_action = "south east";
                         }
                     }
+                    // check if key pressed is Q and move runner north west. update the recent moves stack, the visited cells list and recent action
                     else if(event.getCode() == KeyCode.Q){
                         if(count_undos > 0){
                             count_undos -= 1;
@@ -626,6 +657,7 @@ public class Environment extends Application {
                             recent_action = "north west";
                         }
                     }
+                    // check if key pressed is A and move runner south west. update the recent moves stack, the visited cells list and recent action
                     else if(event.getCode() == KeyCode.A){
                         if(count_undos > 0){
                             count_undos -= 1;
@@ -640,6 +672,7 @@ public class Environment extends Application {
                     }
                 }
 
+                // check if the new position is not null, then calculate the score
                 if(new_pos != null){
                     switch(environ_map.get(new_pos[0])[new_pos[1]]){
                         case 0:
@@ -663,53 +696,75 @@ public class Environment extends Application {
                     }
                     score_label.setText("SCORE: " + score);
                 }
-
-
             }
         });
 
         primaryStage.setScene(scene);
         primaryStage.show();
 }
+
     @SuppressWarnings("Duplicates")
+    // function to undo the user's move
     public static int[] undo_move(GridPane grid, Stack<int[]> moves, ImageView runner, HashMap<Integer,Image> image_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells){
+        // pop the recent moves stack to get the new position to move the runner
         int[] prev_pos = moves.pop();
         int x = prev_pos[0];
         int y = prev_pos[1];
 
+        // get the runner's current position on the grid
         int runner_xpos = getRunner_Xpos(runner);
         int runner_ypos = getRunner_Ypos(runner);
 
+        // get the key of the image where the is currently at
         int prev_image_key = map.get(runner_xpos)[runner_ypos];
         ImageView newView = new ImageView(image_dict.get(prev_image_key));
         newView.setFitWidth(100);
         newView.setFitHeight(100);
 
+        // update the image at the current runner's position
         grid.add(newView, runner_ypos, runner_xpos);
+
+        // remove the runner from the grid
         grid.getChildren().remove(runner);
+
+        // readd the runner at the new undone position
         grid.add(runner, y, x);
 
+        // return the undone move
         return visited_cells.remove(visited_cells.size() - 1);
     }
+
     @SuppressWarnings("Duplicates")
+    // function to redo the user's move
     public static int[] redo_move(GridPane grid, Stack<int[]> redo_moves, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells){
+        // pop the redo moves stack to get the new position to move the runner
         int[] redo_pos = redo_moves.pop();
         int x = redo_pos[0];
         int y = redo_pos[1];
 
+        // get the runner's current position on the grid
         int runner_xpos = getRunner_Xpos(runner);
         int runner_ypos = getRunner_Ypos(runner);
 
+        // get the key of the image where the is currently at
         int next_image_key = map.get(runner_xpos)[runner_ypos];
         ImageView imageView = new ImageView(image_alt_dict.get(next_image_key));
         imageView.setFitHeight(100);
         imageView.setFitWidth(100);
 
+        // update the image at the current runner's position
         grid.add(imageView, runner_ypos, runner_xpos);
+
+        // delete the runner from the grid
         grid.getChildren().remove(runner);
+
+        // readd the runner to the grid
         grid.add(runner, y, x);
+
+        // update the visited cells list witht the redone move
         visited_cells.add(redo_pos);
 
+        // return the redone move
         return redo_pos;
     }
 }
