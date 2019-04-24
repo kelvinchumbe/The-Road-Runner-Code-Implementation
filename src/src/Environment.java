@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
 
-
+// environment
 public class Environment extends Application {
     // variable to keep track whether the user has enabled 8 directions
     boolean enable_8 = false;
