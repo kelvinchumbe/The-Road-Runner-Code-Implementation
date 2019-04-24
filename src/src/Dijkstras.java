@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+// dijkstras
 public class Dijkstras {
     // function to search the runners path using dijkstra's algorithm to the goal node considering the weight of the nodes
     @SuppressWarnings("Duplicates")
