@@ -1,9 +1,4 @@
-import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -14,17 +9,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Stack;
+import java.util.*;
 
 // environment
 public class Environment extends Application {
@@ -59,19 +51,23 @@ public class Environment extends Application {
     ImageView goal;
 
     // create a runner node to keep track of it
-    Node runner = null;
+    Cell_Node runner = null;
 
     //track the goal node
-    Node goal_node;
+    Cell_Node goal_node;
 
     //list of arrays to store the input file's contents
     ArrayList<int[]> environ_map;
 
     // array of array to store the grid nodes
-    Node[][] grid_nodes;
+    Cell_Node[][] grid_nodes;
 
 
+    /**
+        Time Complexity: O()
+        Space Complexity: O()
 
+     */
 
     //method to read input files and return an arraylist of arrays. Each item in the arraylist is an array of integers representing the images in a row
     public static ArrayList<int[]> readfile(String filename) throws IOException {
@@ -189,7 +185,7 @@ public class Environment extends Application {
         primaryStage.setTitle("Road Runner Simulation");
 
         // read and store contents of the file in an arraylist of arrays
-        environ_map = readfile("C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\sample_test_input.txt");
+        environ_map = readfile("C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\The Road Runner Files\\Test Inputs\\sample_test_input_1.txt");
 
         // create a hashmap of the original images
         HashMap<Integer,Image> image_dict = get_images();
@@ -198,7 +194,9 @@ public class Environment extends Application {
         HashMap<Integer,Image> image_alt_dict = get_alt_images();
 
         // initialize the grid nodes array and make it as big as the map
-        grid_nodes = new Node[environ_map.size()][environ_map.get(1).length];
+        grid_nodes = new Cell_Node[environ_map.size()][environ_map.get(1).length];
+
+        int[] clicked_pos = new int[2];
 
 
 
@@ -207,6 +205,13 @@ public class Environment extends Application {
         grid.setHgap(5);
         grid.setVgap(5);
         grid.setAlignment(Pos.CENTER);
+
+//        grid.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+//            Node source = (Node)event.getSource();
+//
+//            clicked_pos[0] =  GridPane.getRowIndex(source);                  //(int)event.getX();
+//            clicked_pos[1] = GridPane.getColumnIndex(source);
+//        });
 
         //create ImageViews for each image, resize them then add them to the grid at the appropriate position
         for(int i=0; i < environ_map.size(); i++){
@@ -220,7 +225,7 @@ public class Environment extends Application {
                     roadrunner.setFitWidth(100);
 
                     // initialize the runner node object
-                    runner = new Node(roadrunner);
+                    runner = new Cell_Node(roadrunner);
 
                     // add the runner to the grid nodes
                     grid_nodes[i][j] = runner;
@@ -230,6 +235,14 @@ public class Environment extends Application {
 
                     // add the runner to the grid
                     grid.add(roadrunner, j, i);
+
+                    roadrunner.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            clicked_pos[0] =  GridPane.getRowIndex(roadrunner);                  //(int)event.getX();
+                            clicked_pos[1] = GridPane.getColumnIndex(roadrunner);
+                        }
+                    });
 
                 }
 
@@ -241,13 +254,21 @@ public class Environment extends Application {
                     goal.setFitHeight(100);
 
                     // initialize the goal node object
-                    goal_node = new Node(goal);
+                    goal_node = new Cell_Node(goal);
 
                     // add the goal to the grid of nodes
                     grid_nodes[i][j] = goal_node;
 
                     // add the goal to the grid
                     grid.add(goal, j, i);
+
+                    goal.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            clicked_pos[0] =  GridPane.getRowIndex(goal);                  //(int)event.getX();
+                            clicked_pos[1] = GridPane.getColumnIndex(goal);
+                        }
+                    });
                 }
 
                 else{
@@ -257,13 +278,21 @@ public class Environment extends Application {
                     image.setFitWidth(100);
 
                     // create a node object of the image
-                    Node image_node = new Node(image);
+                    Cell_Node image_node = new Cell_Node(image);
 
                     // add the node object to the grid nodes
                     grid_nodes[i][j] = image_node;
 
                     // add the image to the grid
                     grid.add(image, j, i);
+
+                    image.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            clicked_pos[0] =  GridPane.getRowIndex(image);                  //(int)event.getX();
+                            clicked_pos[1] = GridPane.getColumnIndex(image);
+                        }
+                    });
                 }
             }
         }
@@ -385,6 +414,9 @@ public class Environment extends Application {
                         if (redo_recent_moves.isEmpty()) {
                             redo.setDisable(true);
                         }
+
+//                        int scored = get_score(score, redone, environ_map);
+//                        score_label.setText("SCORE: " + scored);
                     }
                     // if empty, display a warning
                     else {
@@ -459,29 +491,32 @@ public class Environment extends Application {
                 }
 
                 // check to ensure the redone move is not null before updating the scores
-                if(redone != null){
-                    switch (environ_map.get(redone[0])[redone[1]]) {
-                        case 0:
-                            score -= 1;
-                            break;
-                        case 2:
-                            score -= 2;
-                            break;
-                        case 3:
-                            score -= 4;
-                            break;
-                        case 4:
-                            score -= 8;
-                            break;
-                        case 5:
-                            score += 1;
-                            break;
-                        case 6:
-                            score += 5;
-                            break;
-                    }
-                }
+//                if(redone != null){
+//                    switch (environ_map.get(redone[0])[redone[1]]) {
+//                        case 0:
+//                            score -= 1;
+//                            break;
+//                        case 2:
+//                            score -= 2;
+//                            break;
+//                        case 3:
+//                            score -= 4;
+//                            break;
+//                        case 4:
+//                            score -= 8;
+//                            break;
+//                        case 5:
+//                            score += 1;
+//                            break;
+//                        case 6:
+//                            score += 5;
+//                            break;
+//                    }
+//                }
+//
+//                score_label.setText("SCORE: " + score);
 
+                score = get_score(score, redone, environ_map);
                 score_label.setText("SCORE: " + score);
             }
         });
@@ -492,6 +527,7 @@ public class Environment extends Application {
             public void handle(ActionEvent event) {
                 // reset the member variables of the environment
                 roadrunner = null;
+                clicks = 0;
                 enable_8 = false;
                 count_undos = 0;
                 visited_cells = new ArrayList<>();
@@ -500,9 +536,11 @@ public class Environment extends Application {
                 recent_action = null;
                 score = 0;
                 grid.getChildren().removeAll();
-                grid_nodes = new Node[environ_map.size()][environ_map.get(1).length];
+                grid_nodes = new Cell_Node[environ_map.size()][environ_map.get(1).length];
+                runner = null;
 
                 score_label.setText("Score: " + score);
+                toggleDirection.setText("Enable 8 Direction");
 
                 // repopulate the grid again and update the runner, goal and other images
                 for(int i=0; i < environ_map.size(); i++){
@@ -511,22 +549,26 @@ public class Environment extends Application {
                             roadrunner = new ImageView(image_dict.get(7));
                             roadrunner.setFitHeight(100);
                             roadrunner.setFitWidth(100);
+                            runner = new Cell_Node(roadrunner);
                             visited_cells.add(new int[]{i, j});
                             grid.add(roadrunner, j, i);
+                            grid_nodes[i][j] = runner;
                         }
                         else if(environ_map.get(i)[j] == 9){
                             goal = new ImageView(image_dict.get(9));
                             goal.setFitWidth(100);
                             goal.setFitHeight(100);
-                            goal_node = new Node(goal);
-                            grid_nodes[i][j] = goal_node;
+                            goal_node = new Cell_Node(goal);
                             grid.add(goal, j, i);
+                            grid_nodes[i][j] = goal_node;
                         }
                         else{
                             ImageView image = new ImageView(image_dict.get(environ_map.get(i)[j]));
                             image.setFitHeight(100);
                             image.setFitWidth(100);
+                            Cell_Node image_node = new Cell_Node(image);
                             grid.add(image, j, i);
+                            grid_nodes[i][j] = image_node;
                         }
                     }
                 }
@@ -639,26 +681,161 @@ public class Environment extends Application {
 
         });
 
+        Button set_new_start =  new Button("Set New Start");
+        Button load_map = new Button("Load Map");
+        Button change_weights = new Button("Change Weights");
+
+        set_new_start.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                System.out.println(Arrays.toString(clicked_pos));
+                grid.getChildren().remove(roadrunner);
+                grid.add(roadrunner, clicked_pos[1], clicked_pos[0]);
+
+            }
+        });
+
+
+        load_map.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                System.out.println("Kindly input the path to the new map below");
+                Scanner scanner = new Scanner(System.in);
+
+                String file_path = scanner.nextLine();
+
+                try {
+                    environ_map = readfile(file_path);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                grid_nodes = new Cell_Node[environ_map.size()][environ_map.get(1).length];
+                enable_8 = false;
+                count_undos = 0;
+                visited_cells = new ArrayList<>();
+                recent_moves = new Stack<>();
+                redo_recent_moves = new Stack<>();
+                recent_action = null;
+                score = 0;
+
+                for(int i=0; i < environ_map.size(); i++){
+                    for(int j=0; j < environ_map.get(i).length; j++){
+
+                        // check if the map value represents the start position. If so, put the runner at the start position
+                        if(environ_map.get(i)[j] == 8){
+                            // initialize the runner imageview object
+                            roadrunner = new ImageView(image_dict.get(7));
+                            roadrunner.setFitHeight(100);
+                            roadrunner.setFitWidth(100);
+
+                            // initialize the runner node object
+                            runner = new Cell_Node(roadrunner);
+
+                            // add the runner to the grid nodes
+                            grid_nodes[i][j] = runner;
+
+                            // add the runner's start position to the visited cells list
+                            visited_cells.add(new int[]{i, j});
+
+                            // add the runner to the grid
+                            grid.add(roadrunner, j, i);
+
+                            roadrunner.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                @Override
+                                public void handle(MouseEvent event) {
+                                    clicked_pos[0] =  GridPane.getRowIndex(roadrunner);                  //(int)event.getX();
+                                    clicked_pos[1] = GridPane.getColumnIndex(roadrunner);
+                                }
+                            });
+
+                        }
+
+                        //check if the map value reps the goal position
+                        else if(environ_map.get(i)[j] == 9){
+                            // initialize the goal object
+                            goal = new ImageView(image_dict.get(9));
+                            goal.setFitWidth(100);
+                            goal.setFitHeight(100);
+
+                            // initialize the goal node object
+                            goal_node = new Cell_Node(goal);
+
+                            // add the goal to the grid of nodes
+                            grid_nodes[i][j] = goal_node;
+
+                            // add the goal to the grid
+                            grid.add(goal, j, i);
+
+                            goal.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                @Override
+                                public void handle(MouseEvent event) {
+                                    clicked_pos[0] =  GridPane.getRowIndex(goal);                  //(int)event.getX();
+                                    clicked_pos[1] = GridPane.getColumnIndex(goal);
+                                }
+                            });
+                        }
+
+                        else{
+                            // create a new image view of the image using the image dict hashmap
+                            ImageView image = new ImageView(image_dict.get(environ_map.get(i)[j]));
+                            image.setFitHeight(100);
+                            image.setFitWidth(100);
+
+                            // create a node object of the image
+                            Cell_Node image_node = new Cell_Node(image);
+
+                            // add the node object to the grid nodes
+                            grid_nodes[i][j] = image_node;
+
+                            // add the image to the grid
+                            grid.add(image, j, i);
+
+                            image.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                @Override
+                                public void handle(MouseEvent event) {
+                                    clicked_pos[0] =  GridPane.getRowIndex(image);                  //(int)event.getX();
+                                    clicked_pos[1] = GridPane.getColumnIndex(image);
+                                }
+                            });
+                        }
+                    }
+                }
+//                roadrunner = null;
+
+
+            }
+        });
 
 
 
-        //create a borderpane
-        BorderPane borderPane = new BorderPane();
 
-        borderPane.setTop(score_label);
-        borderPane.setCenter(grid);
 
-        VBox vertical_buttons = new VBox();
-        vertical_buttons.getChildren().addAll(undo, redo, reset, toggleDirection, solve_A_star, solve_dijkstra, solve_dfs);
+        // Organize all the items on the display window (scene)
+        score_label.setAlignment(Pos.TOP_LEFT);
 
-        borderPane.setBottom(vertical_buttons);
-//        borderPane.setLeft(undo);
-//        borderPane.setRight(redo);
+        HBox hBox_top = new HBox();
+        hBox_top.setAlignment(Pos.TOP_CENTER);
+        hBox_top.setSpacing(20);
+        hBox_top.getChildren().addAll(undo, redo, reset, toggleDirection);
 
+        HBox hBox_bottom = new HBox();
+        hBox_bottom.setAlignment(Pos.BOTTOM_CENTER);
+        hBox_bottom.setSpacing(20);
+        hBox_bottom.getChildren().addAll(solve_A_star, solve_dijkstra, solve_dfs);
+
+        HBox hBox_bottom2 = new HBox();
+        hBox_bottom2.setAlignment(Pos.BOTTOM_CENTER);
+        hBox_bottom2.setSpacing(20);
+        hBox_bottom2.getChildren().addAll(set_new_start, load_map, change_weights);
+
+        VBox vBox = new VBox();
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setSpacing(30);
+        vBox.getChildren().addAll(score_label, hBox_top, grid, hBox_bottom, hBox_bottom2);
 
 
         //create a scene and add it to the stage
-        Scene scene = new Scene(borderPane, 800, 700);
+        Scene scene = new Scene(vBox, 800, 700);
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
@@ -830,30 +1007,34 @@ public class Environment extends Application {
                     }
                 }
 
+                score = get_score(score, new_pos, environ_map);
+                score_label.setText("SCORE: " + score);
+
                 // check if the new position is not null, then calculate the score
-                if(new_pos != null){
-                    switch(environ_map.get(new_pos[0])[new_pos[1]]){
-                        case 0:
-                            score -= 1;
-                            break;
-                        case 2:
-                            score -= 2;
-                            break;
-                        case 3:
-                            score -= 4;
-                            break;
-                        case 4:
-                            score -= 8;
-                            break;
-                        case 5:
-                            score += 1;
-                            break;
-                        case 6:
-                            score += 5;
-                            break;
-                    }
-                    score_label.setText("SCORE: " + score);
-                }
+//                if(new_pos != null){
+//                    switch(environ_map.get(new_pos[0])[new_pos[1]]){
+//                        case 0:
+//                            score -= 1;
+//                            break;
+//                        case 2:
+//                            score -= 2;
+//                            break;
+//                        case 3:
+//                            score -= 4;
+//                            break;
+//                        case 4:
+//                            score -= 8;
+//                            break;
+//                        case 5:
+//                            score += 1;
+//                            break;
+//                        case 6:
+//                            score += 5;
+//                            break;
+//                    }
+//                    score_label.setText("SCORE: " + score);
+//                }
+
             }
         });
 
@@ -926,7 +1107,7 @@ public class Environment extends Application {
         return redo_pos;
     }
 
-    public static void move_with_algorithm(GridPane grid, ImageView roadrunner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> environ_map, ArrayList<int[]> visited_cells, Stack<int[]> recent_moves, ArrayList<String> path, Node[][] grid_nodes){
+    public static void move_with_algorithm(GridPane grid, ImageView roadrunner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> environ_map, ArrayList<int[]> visited_cells, Stack<int[]> recent_moves, ArrayList<String> path, Cell_Node[][] grid_nodes){
 
         for (String direction: path) {
 
@@ -990,5 +1171,31 @@ public class Environment extends Application {
 
             }
         }
+    }
+
+    public static int get_score(int score, int[] new_pos, ArrayList<int[]> map) {
+        if (new_pos != null) {
+            switch (map.get(new_pos[0])[new_pos[1]]) {
+                case 0:
+                    score -= 1;
+                    break;
+                case 2:
+                    score -= 2;
+                    break;
+                case 3:
+                    score -= 4;
+                    break;
+                case 4:
+                    score -= 8;
+                    break;
+                case 5:
+                    score += 1;
+                    break;
+                case 6:
+                    score += 5;
+                    break;
+            }
+        }
+        return score;
     }
 }
