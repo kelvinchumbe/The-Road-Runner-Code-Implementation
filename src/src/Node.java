@@ -3,6 +3,7 @@ import javafx.scene.image.ImageView;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+// node
 public class Node {
     // node contains and imageview on the grid
     ImageView imageView;
