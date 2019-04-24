@@ -4,22 +4,33 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Node {
+    // node contains and imageview on the grid
     ImageView imageView;
+
+    // node's fscore
     int fScore;
+
+    // node's gscore
     int gScore;
+
+    // node's heuristics score i.e distance of the node from the goal
     int h;
+
+    // arraylist to store the node.s neighbours
     ArrayList<Node> neighbours;
+
+    // array to store the node's position on the grid
     int[] posOnGrid;
+
+    // node's parent
     Node parent;
-    int parent_x;
-    int parent_y;
+
+    // node's energy cost. Is instrumental when implementing the runners path using dijkstra's algorithm
     int energy_cost;
-    int node_x;
-    int node_y;
 
     public Node(ImageView view){
-        fScore = (int) Double.POSITIVE_INFINITY;
-        gScore = (int) Double.NEGATIVE_INFINITY;
+        fScore = 0;
+        gScore = 0;
         h = 0;
         imageView = view;
         neighbours = new ArrayList<>();
@@ -69,8 +80,5 @@ public class Node {
         posOnGrid = pos;
     }
 
-//    public String toString(){
-//        return Arrays.toString(posOnGrid);
-//    }
 
 }
