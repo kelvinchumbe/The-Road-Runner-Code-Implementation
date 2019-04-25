@@ -1,10 +1,9 @@
 import javafx.scene.image.ImageView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 // node
-public class Node {
+public class Cell_Node {
     // node contains and imageview on the grid
     ImageView imageView;
 
@@ -18,18 +17,18 @@ public class Node {
     int h;
 
     // arraylist to store the node.s neighbours
-    ArrayList<Node> neighbours;
+    ArrayList<Cell_Node> neighbours;
 
     // array to store the node's position on the grid
     int[] posOnGrid;
 
     // node's parent
-    Node parent;
+    Cell_Node parent;
 
     // node's energy cost. Is instrumental when implementing the runners path using dijkstra's algorithm
     int energy_cost;
 
-    public Node(ImageView view){
+    public Cell_Node(ImageView view){
         fScore = 0;
         gScore = 0;
         h = 0;
@@ -61,11 +60,11 @@ public class Node {
         h = H;
     }
 
-    public ArrayList<Node> getNeighbours(){
+    public ArrayList<Cell_Node> getNeighbours(){
         return neighbours;
     }
 
-    public void addNeighbours(Node neighbour_node){
+    public void addNeighbours(Cell_Node neighbour_node){
         this.neighbours.add(neighbour_node);
     }
 

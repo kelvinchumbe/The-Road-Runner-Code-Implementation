@@ -10,9 +10,9 @@ import java.util.Set;
 public class Dijkstras {
     // function to search the runners path using dijkstra's algorithm to the goal node considering the weight of the nodes
     @SuppressWarnings("Duplicates")
-    public static void Dijkstras_Search_8D(Node[][] grid_nodes, Node start, Node goal, HashMap<Integer,Image>image_dict) throws IOException {
+    public static void Dijkstras_Search_8D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image>image_dict) throws IOException {
         // set to store all unvisited nodes
-        Set<Node> unvisited_nodes = new HashSet<>();
+        Set<Cell_Node> unvisited_nodes = new HashSet<>();
 
         // update all nodes in the grid node. Set their gscore to negative infinity and update their neighbours if they are valid i.e are not blocked and their coordinates are valid
         for(int i=0; i < grid_nodes.length; i++){
@@ -73,7 +73,7 @@ public class Dijkstras {
         }
 
         // add all nodes to the unvisited set
-        for(Node[] node_arr: grid_nodes){
+        for(Cell_Node[] node_arr: grid_nodes){
             unvisited_nodes.addAll(Arrays.asList(node_arr));
         }
 
@@ -86,9 +86,9 @@ public class Dijkstras {
         while(!unvisited_nodes.isEmpty() && !foundDestination){
 
             // find the node with the largest gscore and set it to our current
-            Node current = null;
+            Cell_Node current = null;
             int max = (int) Double.NEGATIVE_INFINITY;
-            for(Node node: unvisited_nodes){
+            for(Cell_Node node: unvisited_nodes){
                 if(node.getgScore() > max){
                     current = node;
                     max = current.getgScore();
@@ -110,7 +110,7 @@ public class Dijkstras {
             }
 
             // for each of the current's neighbours
-            for(Node neighbour: current.getNeighbours()){
+            for(Cell_Node neighbour: current.getNeighbours()){
 
                 // check if the neighbour has not been explored yet
                 if(unvisited_nodes.contains(neighbour)){
@@ -135,8 +135,8 @@ public class Dijkstras {
 
     // function to search the runners path using dijkstra's algorithm to the goal node considering the weight of the nodes
     @SuppressWarnings("Duplicates")
-    public static void Dijkstras_Search_4D(Node[][] grid_nodes, Node start, Node goal, HashMap<Integer,Image>image_dict) throws IOException {
-        Set<Node> unvisited_nodes = new HashSet<>();
+    public static void Dijkstras_Search_4D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image>image_dict) throws IOException {
+        Set<Cell_Node> unvisited_nodes = new HashSet<>();
 
         for(int i=0; i < grid_nodes.length; i++){
             for(int j=0; j < grid_nodes[i].length; j++){
@@ -182,7 +182,7 @@ public class Dijkstras {
             }
         }
 
-        for(Node[] node_arr: grid_nodes){
+        for(Cell_Node[] node_arr: grid_nodes){
             unvisited_nodes.addAll(Arrays.asList(node_arr));
         }
 
@@ -190,9 +190,9 @@ public class Dijkstras {
         boolean foundDestination = false;
 
         while(!unvisited_nodes.isEmpty() && !foundDestination){
-            Node current = null;
+            Cell_Node current = null;
             int max = (int) Double.NEGATIVE_INFINITY;
-            for(Node node: unvisited_nodes){
+            for(Cell_Node node: unvisited_nodes){
                 if(node.getgScore() > max){
                     current = node;
                     max = current.getgScore();
@@ -214,7 +214,7 @@ public class Dijkstras {
             }
 
 
-            for(Node neighbour: current.getNeighbours()){
+            for(Cell_Node neighbour: current.getNeighbours()){
                 if(unvisited_nodes.contains(neighbour)){
                     int temp_Score = current.getgScore() +  neighbour.energy_cost;
 

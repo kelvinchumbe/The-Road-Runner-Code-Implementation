@@ -1,7 +1,7 @@
-Start 3 1 
+Start 4 1 
 Goal 0 3 
 East
-East
+North East
 North 
-North 
-North
+North East
+North West

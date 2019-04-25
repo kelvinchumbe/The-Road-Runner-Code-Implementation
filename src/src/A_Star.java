@@ -1,6 +1,5 @@
 import javafx.scene.image.Image;
 
-import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -10,7 +9,7 @@ public class A_Star {
 
     // function to identify the position of the node in the grid
     @SuppressWarnings("Duplicates")
-    public static int[] identify_CellPos(Node node, Node[][] grid_nodes){
+    public static int[] identify_CellPos(Cell_Node node, Cell_Node[][] grid_nodes){
         int[] cell_pos = null;
 
         // go over the grid and search for the node
@@ -26,13 +25,13 @@ public class A_Star {
     }
 
 // check if the coordinates of the cell in the grid are valid
-    public static boolean cell_isValid(Node[][] grid_nodes, int row, int col){
+    public static boolean cell_isValid(Cell_Node[][] grid_nodes, int row, int col){
         return  (row >= 0 && row < grid_nodes.length) && (col >= 0 && col < grid_nodes[1].length);
     }
 
     // check if cell is blocked by a boulder
     @SuppressWarnings("Duplicates")
-    public static boolean cell_isBlocked(Node[][] grid_nodes, int row, int col, HashMap<Integer,Image> image_dict){
+    public static boolean cell_isBlocked(Cell_Node[][] grid_nodes, int row, int col, HashMap<Integer,Image> image_dict){
         int dict_key = 0;
 
         for(Integer key: image_dict.keySet()){
@@ -45,7 +44,7 @@ public class A_Star {
 
     // check if the cell is the destination/ goal cell
     @SuppressWarnings("Duplicates")
-    public static boolean cell_isDestination(Node[][] grid_nodes, int row, int col, HashMap<Integer,Image> image_dict){
+    public static boolean cell_isDestination(Cell_Node[][] grid_nodes, int row, int col, HashMap<Integer,Image> image_dict){
 //        return map.get(row)[col] == 9;
         int dict_key = 0;
 
@@ -58,22 +57,22 @@ public class A_Star {
     }
 
     // function to calculate the heuristic value of the cell from the goal (how far the cell is from the goal) with four neighbours
-    public static int calculateHeuristic_4D(int row, int col, Node goal, Node[][] grid_nodes){
+    public static int calculateHeuristic_4D(int row, int col, Cell_Node goal, Cell_Node[][] grid_nodes){
         int[] goal_pos = identify_CellPos(goal, grid_nodes);
 
         return Math.abs(row - goal_pos[0]) + Math.abs(col - goal_pos[1]);
     }
 
     // function to calculate the heuristic value of the cell from the goal (how far the cell is from the goal) with eight neighbours
-    public static int calculateHeuristic_8D(int row, int col, Node goal, Node[][] grid_nodes){
+    public static int calculateHeuristic_8D(int row, int col, Cell_Node goal, Cell_Node[][] grid_nodes){
         int[] goal_pos = identify_CellPos(goal, grid_nodes);
 
         return Math.max(Math.abs(row - goal_pos[0]), Math.abs(col - goal_pos[1]));
     }
 
     // function to construct the path the runner took after reaching the goal
-    public static void write_constructedPath(Node node, Node start, Node goal) throws IOException {
-        ArrayList<Node> total_path = new ArrayList<>();
+    public static void write_constructedPath(Cell_Node node, Cell_Node start, Cell_Node goal) throws IOException {
+        ArrayList<Cell_Node> total_path = new ArrayList<>();
         total_path.add(node);
 
         while(node.parent != null){
@@ -141,14 +140,14 @@ public class A_Star {
         bufferedWriter.close();
 
         // print to screen the road runners positions as traced from the goal
-        for(Node node1: total_path){
+        for(Cell_Node node1: total_path){
             System.out.println(Arrays.toString(node1.posOnGrid));
         }
     }
 
     // function to trace the runner's shortest path using A* algorithm to the goal with only four directions to take from a node
     @SuppressWarnings("Duplicates")
-    public static void A_StarSearch_4D(Node[][] grid_nodes, Node start, Node goal, HashMap<Integer,Image> image_dict) throws IOException {
+    public static void A_StarSearch_4D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image> image_dict) throws IOException {
         // get the goal position on the grid
         int[] goal_pos = identify_CellPos(goal, grid_nodes);
 
@@ -182,10 +181,10 @@ public class A_Star {
         }
 
         // create a set to store all the visited nodes in the grid
-        Set<Node> closedSet = new HashSet<>();
+        Set<Cell_Node> closedSet = new HashSet<>();
 
         // create a set to store all the unvisited nodes in the grid
-        Set<Node> openSet = new HashSet<>();
+        Set<Cell_Node> openSet = new HashSet<>();
 
         // initialize the unvisited set with the start node
         openSet.add(start);
@@ -193,7 +192,7 @@ public class A_Star {
         // variable to check if we've reached our destination
         boolean foundDestination = false;
 
-        HashMap<Node,Node> cameFromPath = new HashMap<>();
+        HashMap<Cell_Node, Cell_Node> cameFromPath = new HashMap<>();
 
         // loop to update all grid nodes g and f scores with positive infinity.
         // update the nodes with their valid neighbours i.e coordinates are within the grid and are not blocked.
@@ -230,9 +229,9 @@ public class A_Star {
         while(!openSet.isEmpty()){
 
             // find the node with the least fscore value in the open set and set it as our current
-            Node current = null;
+            Cell_Node current = null;
             int least = (int) Double.POSITIVE_INFINITY;
-            for(Node node: openSet){
+            for(Cell_Node node: openSet){
                 if(node.getfScore() < least){
                     current = node;
                     least = current.getfScore();
@@ -257,7 +256,7 @@ public class A_Star {
             closedSet.add(current);
 
             // for each of the current's neighbour nodes..
-            for(Node neighbour: current.getNeighbours()){
+            for(Cell_Node neighbour: current.getNeighbours()){
                 // get is position on the grid
                 int[] neighbour_pos = identify_CellPos(neighbour, grid_nodes);
                 neighbour.posOnGrid = neighbour_pos;
@@ -313,7 +312,7 @@ public class A_Star {
 
     // function to trace the runner's shortest path using A* algorithm to the goal with only eight directions to take from a node
     @SuppressWarnings("Duplicates")
-    public static void A_StarSearch_8D(Node[][] grid_nodes, Node start, Node goal, HashMap<Integer,Image> image_dict) throws IOException {
+    public static void A_StarSearch_8D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image> image_dict) throws IOException {
         int[] goal_pos = identify_CellPos(goal, grid_nodes);
         int[] start_pos = identify_CellPos(start, grid_nodes);
 
@@ -339,13 +338,13 @@ public class A_Star {
         }
 
 
-        Set<Node> closedSet = new HashSet<>();
-        Set<Node> openSet = new HashSet<>();
+        Set<Cell_Node> closedSet = new HashSet<>();
+        Set<Cell_Node> openSet = new HashSet<>();
         openSet.add(start);
 
         boolean foundDestination = false;
 
-        HashMap<Node,Node> cameFromPath = new HashMap<>();
+        HashMap<Cell_Node, Cell_Node> cameFromPath = new HashMap<>();
 
         start.setgScore(0);
         start.setH(calculateHeuristic_8D(start_pos[0], start_pos[1], goal, grid_nodes));
@@ -387,9 +386,9 @@ public class A_Star {
 
         while(!openSet.isEmpty()){
             //Use a Min Queue instead to get the node with the least fScore
-            Node current = null;
+            Cell_Node current = null;
             int least = (int) Double.POSITIVE_INFINITY;
-            for(Node node: openSet){
+            for(Cell_Node node: openSet){
                 if(node.getfScore() < least){
                     current = node;
                     least = current.getfScore();
@@ -409,7 +408,7 @@ public class A_Star {
             openSet.remove(current);
             closedSet.add(current);
 
-            for(Node neighbour: current.getNeighbours()){
+            for(Cell_Node neighbour: current.getNeighbours()){
                 int[] neighbour_pos = identify_CellPos(neighbour, grid_nodes);
                 neighbour.posOnGrid = neighbour_pos;
 

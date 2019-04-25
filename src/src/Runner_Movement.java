@@ -7,7 +7,12 @@ import java.util.HashMap;
 
 public class Runner_Movement {
 
-    public static void replace_image(GridPane grid, ImageView runner, ArrayList<int[]> map, HashMap<Integer,Image> image_alt_dict, int x, int y, Node[][] grid_nodes){
+    public static boolean is_Cell_Blocked(int x, int y, ArrayList<int[]> map){
+        return map.get(x)[y] == 1;
+    }
+
+
+    public static void replace_image(GridPane grid, ImageView runner, ArrayList<int[]> map, HashMap<Integer,Image> image_alt_dict, int x, int y, Cell_Node[][] grid_nodes){
         Integer image_to_replace_key = map.get(x)[y];
 
         ImageView alt_image = new ImageView(image_alt_dict.get(image_to_replace_key));
@@ -15,7 +20,7 @@ public class Runner_Movement {
         alt_image.setFitHeight(100);
         grid.getChildren().remove(runner);
         grid.add(alt_image, y, x);
-        grid_nodes[x][y] = new Node(alt_image);
+        grid_nodes[x][y] = new Cell_Node(alt_image);
     }
 
     public static boolean runner_has_visited_cell(int x, int y, ArrayList<int[]> visited_cells){
@@ -32,7 +37,7 @@ public class Runner_Movement {
     }
 
     @SuppressWarnings("Duplicates")
-    public static int[] moveUp(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Node[][] grid_nodes){
+    public static int[] moveUp(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Cell_Node[][] grid_nodes){
         int runner_xpos = Environment.getRunner_Xpos(runner);
         int runner_ypos = Environment.getRunner_Ypos(runner);
 
@@ -46,10 +51,13 @@ public class Runner_Movement {
                 System.out.println("Runner has already visited this cell");
             }
             else{
-                replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
-                runner_xpos -= 1;
-                grid.add(runner, runner_ypos, runner_xpos);
-                return new int[]{runner_xpos, runner_ypos};
+                if(!is_Cell_Blocked(runner_xpos - 1, runner_ypos, map)){
+                    replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
+                    runner_xpos -= 1;
+                    grid.add(runner, runner_ypos, runner_xpos);
+                    return new int[]{runner_xpos, runner_ypos};
+                }
+
             }
         }
         else{
@@ -59,7 +67,7 @@ public class Runner_Movement {
     }
 
     @SuppressWarnings("Duplicates")
-    public static int[] moveDown(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Node[][] grid_nodes){
+    public static int[] moveDown(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Cell_Node[][] grid_nodes){
         int runner_xpos = Environment.getRunner_Xpos(runner);
         int runner_ypos = Environment.getRunner_Ypos(runner);
 
@@ -73,10 +81,12 @@ public class Runner_Movement {
                 System.out.println("Runner has already visited this cell");
             }
             else{
-                replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
-                runner_xpos += 1;
-                grid.add(runner, runner_ypos, runner_xpos);
-                return new int[]{runner_xpos, runner_ypos};
+                if(!is_Cell_Blocked(runner_xpos + 1, runner_ypos, map)) {
+                    replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
+                    runner_xpos += 1;
+                    grid.add(runner, runner_ypos, runner_xpos);
+                    return new int[]{runner_xpos, runner_ypos};
+                }
             }
         }
         else{
@@ -86,7 +96,7 @@ public class Runner_Movement {
     }
 
     @SuppressWarnings("Duplicates")
-    public static int[] moveLeft(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Node[][] grid_nodes){
+    public static int[] moveLeft(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Cell_Node[][] grid_nodes){
         int runner_xpos = Environment.getRunner_Xpos(runner);
         int runner_ypos = Environment.getRunner_Ypos(runner);
 
@@ -96,10 +106,12 @@ public class Runner_Movement {
                 System.out.println("Runner has already visited this cell");
             }
             else{
-                replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
-                runner_ypos -= 1;
-                grid.add(runner, runner_ypos, runner_xpos);
-                return new int[]{runner_xpos, runner_ypos};
+                if(!is_Cell_Blocked(runner_xpos, runner_ypos - 1, map)) {
+                    replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
+                    runner_ypos -= 1;
+                    grid.add(runner, runner_ypos, runner_xpos);
+                    return new int[]{runner_xpos, runner_ypos};
+                }
             }
         }
         else{
@@ -109,7 +121,7 @@ public class Runner_Movement {
     }
 
     @SuppressWarnings("Duplicates")
-    public static int[] moveRight(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Node[][] grid_nodes){
+    public static int[] moveRight(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Cell_Node[][] grid_nodes){
         int runner_xpos = Environment.getRunner_Xpos(runner);
         int runner_ypos = Environment.getRunner_Ypos(runner);
 
@@ -119,10 +131,12 @@ public class Runner_Movement {
                 System.out.println("Runner has already visited this cell");
             }
             else{
-                replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
-                runner_ypos += 1;
-                grid.add(runner, runner_ypos, runner_xpos);
-                return new int[]{runner_xpos, runner_ypos};
+                if(!is_Cell_Blocked(runner_xpos, runner_ypos + 1, map)) {
+                    replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
+                    runner_ypos += 1;
+                    grid.add(runner, runner_ypos, runner_xpos);
+                    return new int[]{runner_xpos, runner_ypos};
+                }
             }
         }
         else{
@@ -131,7 +145,7 @@ public class Runner_Movement {
         return null;
     }
 
-    public static int[] moveNorthEast(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Node[][] grid_nodes){
+    public static int[] moveNorthEast(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Cell_Node[][] grid_nodes){
         int runner_xpos = Environment.getRunner_Xpos(runner);
         int runner_ypos = Environment.getRunner_Ypos(runner);
 
@@ -141,11 +155,13 @@ public class Runner_Movement {
                 System.out.println("Runner has already visited this cell");
             }
             else{
-                replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
-                runner_ypos += 1;
-                runner_xpos -= 1;
-                grid.add(runner, runner_ypos, runner_xpos);
-                return new int[]{runner_xpos, runner_ypos};
+                if(!is_Cell_Blocked(runner_xpos - 1, runner_ypos + 1, map)) {
+                    replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
+                    runner_ypos += 1;
+                    runner_xpos -= 1;
+                    grid.add(runner, runner_ypos, runner_xpos);
+                    return new int[]{runner_xpos, runner_ypos};
+                }
             }
         }
         else{
@@ -155,7 +171,7 @@ public class Runner_Movement {
     }
 
     @SuppressWarnings("Duplicates")
-    public static int[] moveNorthWest(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Node[][] grid_nodes){
+    public static int[] moveNorthWest(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Cell_Node[][] grid_nodes){
         int runner_xpos = Environment.getRunner_Xpos(runner);
         int runner_ypos = Environment.getRunner_Ypos(runner);
 
@@ -165,11 +181,13 @@ public class Runner_Movement {
                 System.out.println("Runner has already visited this cell");
             }
             else{
-                replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
-                runner_xpos -= 1;
-                runner_ypos -= 1;
-                grid.add(runner, runner_ypos, runner_xpos);
-                return new int[]{runner_xpos, runner_ypos};
+                if(!is_Cell_Blocked(runner_xpos - 1, runner_ypos - 1, map)) {
+                    replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
+                    runner_xpos -= 1;
+                    runner_ypos -= 1;
+                    grid.add(runner, runner_ypos, runner_xpos);
+                    return new int[]{runner_xpos, runner_ypos};
+                }
             }
         }
         else{
@@ -179,7 +197,7 @@ public class Runner_Movement {
     }
 
     @SuppressWarnings("Duplicates")
-    public static int[] moveSouthEast(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Node[][] grid_nodes){
+    public static int[] moveSouthEast(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Cell_Node[][] grid_nodes){
         int runner_xpos = Environment.getRunner_Xpos(runner);
         int runner_ypos = Environment.getRunner_Ypos(runner);
 
@@ -189,11 +207,13 @@ public class Runner_Movement {
                 System.out.println("Runner has already visited this cell");
             }
             else{
-                replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
-                runner_xpos += 1;
-                runner_ypos += 1;
-                grid.add(runner, runner_ypos, runner_xpos);
-                return new int[]{runner_xpos, runner_ypos};
+                if(!is_Cell_Blocked(runner_xpos + 1, runner_ypos + 1, map)) {
+                    replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
+                    runner_xpos += 1;
+                    runner_ypos += 1;
+                    grid.add(runner, runner_ypos, runner_xpos);
+                    return new int[]{runner_xpos, runner_ypos};
+                }
             }
         }
         else{
@@ -202,7 +222,7 @@ public class Runner_Movement {
         return null;
     }
 
-    public static int[] moveSouthWest(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Node[][] grid_nodes){
+    public static int[] moveSouthWest(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Cell_Node[][] grid_nodes){
         int runner_xpos = Environment.getRunner_Xpos(runner);
         int runner_ypos = Environment.getRunner_Ypos(runner);
 
@@ -212,11 +232,13 @@ public class Runner_Movement {
                 System.out.println("Runner has already visited this cell");
             }
             else{
-                replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
-                runner_ypos -= 1;
-                runner_xpos += 1;
-                grid.add(runner, runner_ypos, runner_xpos);
-                return new int[]{runner_xpos, runner_ypos};
+                if(!is_Cell_Blocked(runner_xpos + 1, runner_ypos - 1, map)) {
+                    replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
+                    runner_ypos -= 1;
+                    runner_xpos += 1;
+                    grid.add(runner, runner_ypos, runner_xpos);
+                    return new int[]{runner_xpos, runner_ypos};
+                }
             }
         }
         else{
