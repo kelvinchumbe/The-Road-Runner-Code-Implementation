@@ -64,9 +64,9 @@ public class Environment extends Application {
 
 
     /**
-        Time Complexity: O()
-        Space Complexity: O()
-
+        Time Complexity: O(N)
+        Space Complexity: O(N)
+        Auxiliary Space: O(N)
      */
 
     //method to read input files and return an arraylist of arrays. Each item in the arraylist is an array of integers representing the images in a row
@@ -100,6 +100,11 @@ public class Environment extends Application {
         return environmentMap;
     }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(N)
+     Auxiliary Space: O(N)
+     */
     //method to return an hashmap of integers mapping to image objects
     public static HashMap<Integer,Image> get_images() throws FileNotFoundException {
         //read image files and create image objects
@@ -134,6 +139,11 @@ public class Environment extends Application {
         return image_dict;
     }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(N)
+     Auxiliary Space: O(N)
+     */
     //method to return a hashmap of integers mapping to the alternative images
     public static HashMap <Integer,Image> get_alt_images() throws FileNotFoundException {
         //read images files and create their image objects
@@ -165,11 +175,21 @@ public class Environment extends Application {
         return images_alt_dict;
     }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(1)
+     Auxiliary Space: O(1)
+     */
     // funtion to find the runner's x position in the grid
     public static int getRunner_Xpos(ImageView runner){
         return GridPane.getRowIndex(runner);
     }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(1)
+     Auxiliary Space: O(1)
+     */
     // funtion to find the runner's y position in the grid
     public static int getRunner_Ypos(ImageView runner){
         return GridPane.getColumnIndex(runner);
@@ -206,12 +226,6 @@ public class Environment extends Application {
         grid.setVgap(5);
         grid.setAlignment(Pos.CENTER);
 
-//        grid.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-//            Node source = (Node)event.getSource();
-//
-//            clicked_pos[0] =  GridPane.getRowIndex(source);                  //(int)event.getX();
-//            clicked_pos[1] = GridPane.getColumnIndex(source);
-//        });
 
         //create ImageViews for each image, resize them then add them to the grid at the appropriate position
         for(int i=0; i < environ_map.size(); i++){
@@ -301,8 +315,14 @@ public class Environment extends Application {
         Button toggleDirection = new Button();
         toggleDirection.setText("Enable 8 Direction");
 
+        // set actions when the toggleDiection button is clicked
         toggleDirection.setOnAction(new EventHandler<ActionEvent>() {
             @Override
+            /**
+             Time Complexity: O(1)
+             Space Complexity: O(1)
+             Auxiliary Space: O(1)
+             */
             public void handle(ActionEvent event) {
                 clicks += 1;
 
@@ -330,6 +350,11 @@ public class Environment extends Application {
         // define what happens when the undo button is clicked
         undo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
+            /**
+             Time Complexity: O(1)
+             Space Complexity: O(1)
+             Auxiliary Space: O(1)
+             */
             public void handle(ActionEvent event) {
                 // check if the recent moves stack is not empty before undoing a move
                 if(!recent_moves.isEmpty()) {
@@ -390,6 +415,11 @@ public class Environment extends Application {
         // define what happens when the redo button is clicked
         redo.setOnAction(new EventHandler<ActionEvent>() {
             @Override
+            /**
+             Time Complexity: O(1)
+             Space Complexity: O(1)
+             Auxiliary Space: O(1)
+             */
             @SuppressWarnings("Duplicates")
             public void handle(ActionEvent event) {
                 // array to store the recently redone move
@@ -414,10 +444,8 @@ public class Environment extends Application {
                         if (redo_recent_moves.isEmpty()) {
                             redo.setDisable(true);
                         }
-
-//                        int scored = get_score(score, redone, environ_map);
-//                        score_label.setText("SCORE: " + scored);
                     }
+
                     // if empty, display a warning
                     else {
                         System.out.println("Cannot Redo");
@@ -490,32 +518,6 @@ public class Environment extends Application {
                     }
                 }
 
-                // check to ensure the redone move is not null before updating the scores
-//                if(redone != null){
-//                    switch (environ_map.get(redone[0])[redone[1]]) {
-//                        case 0:
-//                            score -= 1;
-//                            break;
-//                        case 2:
-//                            score -= 2;
-//                            break;
-//                        case 3:
-//                            score -= 4;
-//                            break;
-//                        case 4:
-//                            score -= 8;
-//                            break;
-//                        case 5:
-//                            score += 1;
-//                            break;
-//                        case 6:
-//                            score += 5;
-//                            break;
-//                    }
-//                }
-//
-//                score_label.setText("SCORE: " + score);
-
                 score = get_score(score, redone, environ_map);
                 score_label.setText("SCORE: " + score);
             }
@@ -524,9 +526,14 @@ public class Environment extends Application {
         // define what happens when the reset button is clicked
         reset.setOnAction(new EventHandler<ActionEvent>() {
             @Override
+            /**
+             Time Complexity: O(N)
+             Space Complexity: O(N)
+             Auxiliary Space: O(N)
+             */
             public void handle(ActionEvent event) {
                 // reset the member variables of the environment
-                roadrunner = null;
+//                roadrunner = null;
                 clicks = 0;
                 enable_8 = false;
                 count_undos = 0;
@@ -535,9 +542,13 @@ public class Environment extends Application {
                 redo_recent_moves = new Stack<>();
                 recent_action = null;
                 score = 0;
+
+                // delete all images from the grid before adding new Imageviews
                 grid.getChildren().removeAll();
+
+                // update the grid nodes with nodes from the new image objects created
                 grid_nodes = new Cell_Node[environ_map.size()][environ_map.get(1).length];
-                runner = null;
+//                runner = null;
 
                 score_label.setText("Score: " + score);
                 toggleDirection.setText("Enable 8 Direction");
@@ -578,6 +589,7 @@ public class Environment extends Application {
             }
         });
 
+        // create buttons to solve the runners path using A*, Dijkstra and DFS algorithms
         Button solve_A_star = new Button("Solve with A*");
         Button solve_dijkstra = new Button("Solve with Dijkstra");
         Button solve_dfs = new Button("Solve with DFS");
@@ -585,6 +597,11 @@ public class Environment extends Application {
         solve_A_star.setOnAction(new EventHandler<ActionEvent>() {
             @SuppressWarnings("Duplicates")
             @Override
+            /**
+             Time Complexity: O(N)
+             Space Complexity: O(N)
+             Auxiliary Space: O(1)
+             */
             public void handle(ActionEvent event) {
                 if (enable_8) {
                     try {
@@ -636,6 +653,11 @@ public class Environment extends Application {
         solve_dijkstra.setOnAction(new EventHandler<ActionEvent>() {
             @SuppressWarnings("Duplicates")
             @Override
+            /**
+             Time Complexity: O(N)
+             Space Complexity: O(N)
+             Auxiliary Space: O(1)
+             */
             public void handle(ActionEvent event) {
                 if (enable_8) {
                     try {
@@ -681,12 +703,24 @@ public class Environment extends Application {
 
         });
 
+        // create buttons to manipulate the GUI
+        // button to set a new start position by clicking on a grid position
         Button set_new_start =  new Button("Set New Start");
+
+        // button to load a new map to the grid
         Button load_map = new Button("Load Map");
+
+        // button to change the weights of the nodes in the grid
         Button change_weights = new Button("Change Weights");
+
 
         set_new_start.setOnAction(new EventHandler<ActionEvent>() {
             @Override
+            /**
+             Time Complexity: O(1)
+             Space Complexity: O(1)
+             Auxiliary Space: O(1)
+             */
             public void handle(ActionEvent event) {
                 System.out.println(Arrays.toString(clicked_pos));
                 grid.getChildren().remove(roadrunner);
@@ -698,6 +732,11 @@ public class Environment extends Application {
 
         load_map.setOnAction(new EventHandler<ActionEvent>() {
             @Override
+            /**
+             Time Complexity: O(N)
+             Space Complexity: O(N)
+             Auxiliary Space: O(N)
+             */
             public void handle(ActionEvent event) {
                 System.out.println("Kindly input the path to the new map below");
                 Scanner scanner = new Scanner(System.in);
@@ -807,9 +846,6 @@ public class Environment extends Application {
         });
 
 
-
-
-
         // Organize all the items on the display window (scene)
         score_label.setAlignment(Pos.TOP_LEFT);
 
@@ -840,6 +876,11 @@ public class Environment extends Application {
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             @SuppressWarnings("Duplicates")
+            /**
+             Time Complexity: O(1)
+             Space Complexity: O(1)
+             Auxiliary Space: O(1)
+             */
             public void handle(KeyEvent event) {
                 // array to store the new position of the runner
                 int[] new_pos = null;
@@ -1010,31 +1051,6 @@ public class Environment extends Application {
                 score = get_score(score, new_pos, environ_map);
                 score_label.setText("SCORE: " + score);
 
-                // check if the new position is not null, then calculate the score
-//                if(new_pos != null){
-//                    switch(environ_map.get(new_pos[0])[new_pos[1]]){
-//                        case 0:
-//                            score -= 1;
-//                            break;
-//                        case 2:
-//                            score -= 2;
-//                            break;
-//                        case 3:
-//                            score -= 4;
-//                            break;
-//                        case 4:
-//                            score -= 8;
-//                            break;
-//                        case 5:
-//                            score += 1;
-//                            break;
-//                        case 6:
-//                            score += 5;
-//                            break;
-//                    }
-//                    score_label.setText("SCORE: " + score);
-//                }
-
             }
         });
 
@@ -1042,6 +1058,11 @@ public class Environment extends Application {
         primaryStage.show();
 }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(N)
+     Auxiliary Space: O(N)
+     */
     @SuppressWarnings("Duplicates")
     // function to undo the user's move
     public static int[] undo_move(GridPane grid, Stack<int[]> moves, ImageView runner, HashMap<Integer,Image> image_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells){
@@ -1073,6 +1094,11 @@ public class Environment extends Application {
         return visited_cells.remove(visited_cells.size() - 1);
     }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(N)
+     Auxiliary Space: O(N)
+     */
     @SuppressWarnings("Duplicates")
     // function to redo the user's move
     public static int[] redo_move(GridPane grid, Stack<int[]> redo_moves, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells){
@@ -1107,6 +1133,11 @@ public class Environment extends Application {
         return redo_pos;
     }
 
+    /**
+     Time Complexity: O(N)
+     Space Complexity: O(N)
+     Auxiliary Space: O(N)
+     */
     public static void move_with_algorithm(GridPane grid, ImageView roadrunner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> environ_map, ArrayList<int[]> visited_cells, Stack<int[]> recent_moves, ArrayList<String> path, Cell_Node[][] grid_nodes){
 
         for (String direction: path) {
@@ -1173,6 +1204,11 @@ public class Environment extends Application {
         }
     }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(N)
+     Auxiliary Space: O(N)
+     */
     public static int get_score(int score, int[] new_pos, ArrayList<int[]> map) {
         if (new_pos != null) {
             switch (map.get(new_pos[0])[new_pos[1]]) {
