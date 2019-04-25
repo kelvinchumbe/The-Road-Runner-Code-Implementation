@@ -6,7 +6,6 @@ import java.util.*;
 
 // A_Star
 public class A_Star {
-
     /**
      Time Complexity: O(N^2)
      Space Complexity: O(N^2)
