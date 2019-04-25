@@ -7,6 +7,11 @@ import java.util.*;
 // A_Star
 public class A_Star {
 
+    /**
+     Time Complexity: O(N^2)
+     Space Complexity: O(N^2)
+     Auxiliary Space: O(N)
+     */
     // function to identify the position of the node in the grid
     @SuppressWarnings("Duplicates")
     public static int[] identify_CellPos(Cell_Node node, Cell_Node[][] grid_nodes){
@@ -24,11 +29,21 @@ public class A_Star {
         return cell_pos;
     }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(1)
+     Auxiliary Space: O(1)
+     */
 // check if the coordinates of the cell in the grid are valid
     public static boolean cell_isValid(Cell_Node[][] grid_nodes, int row, int col){
         return  (row >= 0 && row < grid_nodes.length) && (col >= 0 && col < grid_nodes[1].length);
     }
 
+    /**
+     Time Complexity: O(N)
+     Space Complexity: O(N)
+     Auxiliary Space: O(1)
+     */
     // check if cell is blocked by a boulder
     @SuppressWarnings("Duplicates")
     public static boolean cell_isBlocked(Cell_Node[][] grid_nodes, int row, int col, HashMap<Integer,Image> image_dict){
@@ -42,6 +57,11 @@ public class A_Star {
         return dict_key == 1;
     }
 
+    /**
+     Time Complexity: O(N)
+     Space Complexity: O(N)
+     Auxiliary Space: O(1)
+     */
     // check if the cell is the destination/ goal cell
     @SuppressWarnings("Duplicates")
     public static boolean cell_isDestination(Cell_Node[][] grid_nodes, int row, int col, HashMap<Integer,Image> image_dict){
@@ -56,6 +76,11 @@ public class A_Star {
         return dict_key == 9;
     }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(N)
+     Auxiliary Space: O(N)
+     */
     // function to calculate the heuristic value of the cell from the goal (how far the cell is from the goal) with four neighbours
     public static int calculateHeuristic_4D(int row, int col, Cell_Node goal, Cell_Node[][] grid_nodes){
         int[] goal_pos = identify_CellPos(goal, grid_nodes);
@@ -63,6 +88,11 @@ public class A_Star {
         return Math.abs(row - goal_pos[0]) + Math.abs(col - goal_pos[1]);
     }
 
+    /**
+     Time Complexity: O(1)
+     Space Complexity: O(N)
+     Auxiliary Space: O(N)
+     */
     // function to calculate the heuristic value of the cell from the goal (how far the cell is from the goal) with eight neighbours
     public static int calculateHeuristic_8D(int row, int col, Cell_Node goal, Cell_Node[][] grid_nodes){
         int[] goal_pos = identify_CellPos(goal, grid_nodes);
@@ -70,6 +100,11 @@ public class A_Star {
         return Math.max(Math.abs(row - goal_pos[0]), Math.abs(col - goal_pos[1]));
     }
 
+    /**
+     Time Complexity: O(N^2)
+     Space Complexity: O(N^2)
+     Auxiliary Space: O(N)
+     */
     // function to construct the path the runner took after reaching the goal
     public static void write_constructedPath(Cell_Node node, Cell_Node start, Cell_Node goal) throws IOException {
         ArrayList<Cell_Node> total_path = new ArrayList<>();
@@ -145,6 +180,11 @@ public class A_Star {
         }
     }
 
+    /**
+     Time Complexity: O(N^2)
+     Space Complexity: O(N^2)
+     Auxiliary Space: O(N)
+     */
     // function to trace the runner's shortest path using A* algorithm to the goal with only four directions to take from a node
     @SuppressWarnings("Duplicates")
     public static void A_StarSearch_4D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image> image_dict) throws IOException {
@@ -310,6 +350,11 @@ public class A_Star {
 
     }
 
+    /**
+     Time Complexity: O(N^2)
+     Space Complexity: O(N^2)
+     Auxiliary Space: O(N)
+     */
     // function to trace the runner's shortest path using A* algorithm to the goal with only eight directions to take from a node
     @SuppressWarnings("Duplicates")
     public static void A_StarSearch_8D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image> image_dict) throws IOException {
