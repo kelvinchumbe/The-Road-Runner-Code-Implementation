@@ -58,7 +58,7 @@ public class Dijkstras {
                                 grid_nodes[i][j].energy_cost = -1;
                                 break;
                             case 2:
-                                grid_nodes[i][j].energy_cost = -2;
+                                grid_nodes[i][j].energy_cost = -50;
                                 break;
                             case 3:
                                 grid_nodes[i][j].energy_cost = -4;
@@ -174,7 +174,7 @@ public class Dijkstras {
                                 grid_nodes[i][j].energy_cost = -1;
                                 break;
                             case 2:
-                                grid_nodes[i][j].energy_cost = -2;
+                                grid_nodes[i][j].energy_cost = -50;
                                 break;
                             case 3:
                                 grid_nodes[i][j].energy_cost = -4;
