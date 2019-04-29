@@ -1,26 +1,66 @@
 import javafx.scene.image.Image;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 // dijkstras
 // Methods used to determine validity of some aspects have been borrowed from static methods in the A_Star class
 public class Dijkstras {
-    /**
-     Time Complexity: O(N^2)
-     Space Complexity: O(N^2)
-     Auxiliary Space: O(N)
-     */
-    // function to search the runners path using dijkstra's algorithm to the goal node considering the weight of the nodes
-    @SuppressWarnings("Duplicates")
-    public static void Dijkstras_Search_8D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image>image_dict) throws IOException {
-        // set to store all unvisited nodes
-        Set<Cell_Node> unvisited_nodes = new HashSet<>();
+    public static void setEnergyCosts(Cell_Node[][] grid_nodes, HashMap<Integer, Image> image_dict, HashMap<Integer,Integer> weight_dict){
+        for(int i=0; i < grid_nodes.length; i++){
+            for(int j=0; j < grid_nodes[i].length; j++){
+                for(Integer key: image_dict.keySet()){
+                    if(image_dict.get(key).equals(grid_nodes[i][j].getImageView().getImage())){
+                        switch (key){
+                            case 0:
+                                grid_nodes[i][j].energy_cost = weight_dict.get(0);
+                                break;
+                            case 2:
+                                grid_nodes[i][j].energy_cost = weight_dict.get(2);
+                                break;
+                            case 3:
+                                grid_nodes[i][j].energy_cost = weight_dict.get(3);
+                                break;
+                            case 4:
+                                grid_nodes[i][j].energy_cost = weight_dict.get(4);
+                                break;
+                            case 5:
+                                grid_nodes[i][j].energy_cost = weight_dict.get(5);
+                                break;
+                            case 6:
+                                grid_nodes[i][j].energy_cost = weight_dict.get(6);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-        // update all nodes in the grid node. Set their gscore to negative infinity and update their neighbours if they are valid i.e are not blocked and their coordinates are valid
+
+    public static void set4Neighbours(Cell_Node[][] grid_nodes, HashMap<Integer,Image> image_dict){
+        for(int i=0; i < grid_nodes.length; i++){
+            for(int j=0; j < grid_nodes[i].length; j++){
+                grid_nodes[i][j].setgScore((int) Double.NEGATIVE_INFINITY);
+
+                if(A_Star.cell_isValid(grid_nodes, i-1, j) && !A_Star.cell_isBlocked(grid_nodes, i-1, j, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i-1][j]);
+                }
+                if(A_Star.cell_isValid(grid_nodes, i, j-1) && !A_Star.cell_isBlocked(grid_nodes, i, j-1, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j-1]);
+                }
+                if(A_Star.cell_isValid(grid_nodes, i, j+1) && !A_Star.cell_isBlocked(grid_nodes, i, j+1, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j+1]);
+                }
+                if(A_Star.cell_isValid(grid_nodes, i+1, j) && !A_Star.cell_isBlocked(grid_nodes, i+1, j, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i+1][j]);
+                }
+            }
+        }
+    }
+
+
+    public static void set8Neighbours(Cell_Node[][] grid_nodes, HashMap<Integer,Image> image_dict){
         for(int i=0; i < grid_nodes.length; i++){
             for(int j=0; j < grid_nodes[i].length; j++){
                 grid_nodes[i][j].setgScore((int) Double.NEGATIVE_INFINITY);
@@ -49,34 +89,85 @@ public class Dijkstras {
                 if(A_Star.cell_isValid(grid_nodes, i+1, j+1) && !A_Star.cell_isBlocked(grid_nodes, i+1, j+1, image_dict)){
                     grid_nodes[i][j].addNeighbours(grid_nodes[i+1][j+1]);
                 }
-
-                // update the grid nodes energy cost
-                for(Integer key: image_dict.keySet()){
-                    if(image_dict.get(key).equals(grid_nodes[i][j].getImageView().getImage())){
-                        switch (key){
-                            case 0:
-                                grid_nodes[i][j].energy_cost = -1;
-                                break;
-                            case 2:
-                                grid_nodes[i][j].energy_cost = -50;
-                                break;
-                            case 3:
-                                grid_nodes[i][j].energy_cost = -4;
-                                break;
-                            case 4:
-                                grid_nodes[i][j].energy_cost = -8;
-                                break;
-                            case 5:
-                                grid_nodes[i][j].energy_cost = 1;
-                                break;
-                            case 6:
-                                grid_nodes[i][j].energy_cost = 5;
-                                break;
-                        }
-                    }
-                }
             }
         }
+    }
+
+
+
+
+    /**
+     Time Complexity: O(N^2)
+     Space Complexity: O(N^2)
+     Auxiliary Space: O(N)
+     */
+    // function to search the runners path using dijkstra's algorithm to the goal node considering the weight of the nodes
+    @SuppressWarnings("Duplicates")
+    public static ArrayList<String> Dijkstras_Search_8D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image>image_dict, HashMap<Integer,Integer> weight_dict) throws IOException {
+        // set to store all unvisited nodes
+        Set<Cell_Node> unvisited_nodes = new HashSet<>();
+
+        // update all nodes in the grid node. Set their gscore to negative infinity and update their neighbours if they are valid i.e are not blocked and their coordinates are valid
+//        for(int i=0; i < grid_nodes.length; i++){
+//            for(int j=0; j < grid_nodes[i].length; j++) {
+//                grid_nodes[i][j].setgScore((int) Double.NEGATIVE_INFINITY);
+//
+//                if (A_Star.cell_isValid(grid_nodes, i - 1, j - 1) && !A_Star.cell_isBlocked(grid_nodes, i - 1, j - 1, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i - 1][j - 1]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i - 1, j) && !A_Star.cell_isBlocked(grid_nodes, i - 1, j, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i - 1][j]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i - 1, j + 1) && !A_Star.cell_isBlocked(grid_nodes, i - 1, j + 1, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i - 1][j + 1]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i, j - 1) && !A_Star.cell_isBlocked(grid_nodes, i, j - 1, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j - 1]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i, j + 1) && !A_Star.cell_isBlocked(grid_nodes, i, j + 1, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j + 1]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i + 1, j - 1) && !A_Star.cell_isBlocked(grid_nodes, i + 1, j - 1, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i + 1][j - 1]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i + 1, j) && !A_Star.cell_isBlocked(grid_nodes, i + 1, j, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i + 1][j]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i + 1, j + 1) && !A_Star.cell_isBlocked(grid_nodes, i + 1, j + 1, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i + 1][j + 1]);
+//                }
+//
+//                //update the grid nodes energy cost
+//                for (Integer key : image_dict.keySet()) {
+//                    if (image_dict.get(key).equals(grid_nodes[i][j].getImageView().getImage())) {
+//                        switch (key) {
+//                            case 0:
+//                                grid_nodes[i][j].energy_cost = -1;
+//                                break;
+//                            case 2:
+//                                grid_nodes[i][j].energy_cost = -2;
+//                                break;
+//                            case 3:
+//                                grid_nodes[i][j].energy_cost = -4;
+//                                break;
+//                            case 4:
+//                                grid_nodes[i][j].energy_cost = -8;
+//                                break;
+//                            case 5:
+//                                grid_nodes[i][j].energy_cost = 1;
+//                                break;
+//                            case 6:
+//                                grid_nodes[i][j].energy_cost = 5;
+//                                break;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+
+        set8Neighbours(grid_nodes, image_dict);
+
+        setEnergyCosts(grid_nodes, image_dict, weight_dict);
 
         // add all nodes to the unvisited set
         for(Cell_Node[] node_arr: grid_nodes){
@@ -89,7 +180,7 @@ public class Dijkstras {
         boolean foundDestination = false;
 
         // there's still nodes in the unvisited set and we havent found the destination
-        while(!unvisited_nodes.isEmpty() && !foundDestination){
+        while(!unvisited_nodes.isEmpty()){
 
             // find the node with the largest gscore and set it to our current
             Cell_Node current = null;
@@ -104,15 +195,19 @@ public class Dijkstras {
             // remove the current node from the unvisited set
             unvisited_nodes.remove(current);
 
+            if(current == null){
+                break;
+            }
+
             // get the current's nodes position on the grid
             int[] current_pos = A_Star.identify_CellPos(current, grid_nodes);
             current.posOnGrid = current_pos;
 
             // check if our current node is our destination
             if(A_Star.cell_isDestination(grid_nodes, current_pos[0], current_pos[1], image_dict)){
-                A_Star.write_constructedPath(current, start, goal);
                 foundDestination = true;
-                break;
+                return A_Star.write_constructedPath(current, start, goal);
+//                break;
             }
 
             // for each of the current's neighbours
@@ -134,9 +229,10 @@ public class Dijkstras {
         }
 
         // if the unvisited set is empty and we havent found our destination, alert the user
-        if(unvisited_nodes.isEmpty() && !foundDestination){
+        if(!foundDestination){
             System.out.println("Could Not Find the Destination");
         }
+        return null;
     }
 
     /**
@@ -146,53 +242,58 @@ public class Dijkstras {
      */
     // function to search the runners path using dijkstra's algorithm to the goal node considering the weight of the nodes
     @SuppressWarnings("Duplicates")
-    public static void Dijkstras_Search_4D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image>image_dict) throws IOException {
+    public static ArrayList<String> Dijkstras_Search_4D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image>image_dict, HashMap<Integer,Integer> weight_dict) throws IOException {
         Set<Cell_Node> unvisited_nodes = new HashSet<>();
 
         // update the grid nodes's gscore, their neighbours and their energy costs
-        for(int i=0; i < grid_nodes.length; i++){
-            for(int j=0; j < grid_nodes[i].length; j++){
-                grid_nodes[i][j].setgScore((int) Double.NEGATIVE_INFINITY);
+//        for(int i=0; i < grid_nodes.length; i++) {
+//            for (int j = 0; j < grid_nodes[i].length; j++) {
+//                grid_nodes[i][j].setgScore((int) Double.NEGATIVE_INFINITY);
+//
+//                if (A_Star.cell_isValid(grid_nodes, i - 1, j) && !A_Star.cell_isBlocked(grid_nodes, i - 1, j, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i - 1][j]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i, j - 1) && !A_Star.cell_isBlocked(grid_nodes, i, j - 1, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j - 1]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i, j + 1) && !A_Star.cell_isBlocked(grid_nodes, i, j + 1, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j + 1]);
+//                }
+//                if (A_Star.cell_isValid(grid_nodes, i + 1, j) && !A_Star.cell_isBlocked(grid_nodes, i + 1, j, image_dict)) {
+//                    grid_nodes[i][j].addNeighbours(grid_nodes[i + 1][j]);
+//                }
+//
+//                for (Integer key : image_dict.keySet()) {
+//                    if (image_dict.get(key).equals(grid_nodes[i][j].getImageView().getImage())) {
+//                        switch (key) {
+//                            case 0:
+//                                grid_nodes[i][j].energy_cost = -1;
+//                                break;
+//                            case 2:
+//                                grid_nodes[i][j].energy_cost = -2;
+//                                break;
+//                            case 3:
+//                                grid_nodes[i][j].energy_cost = -4;
+//                                break;
+//                            case 4:
+//                                grid_nodes[i][j].energy_cost = -8;
+//                                break;
+//                            case 5:
+//                                grid_nodes[i][j].energy_cost = 1;
+//                                break;
+//                            case 6:
+//                                grid_nodes[i][j].energy_cost = 5;
+//                                break;
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
-                if(A_Star.cell_isValid(grid_nodes, i-1, j) && !A_Star.cell_isBlocked(grid_nodes, i-1, j, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i-1][j]);
-                }
-                if(A_Star.cell_isValid(grid_nodes, i, j-1) && !A_Star.cell_isBlocked(grid_nodes, i, j-1, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j-1]);
-                }
-                if(A_Star.cell_isValid(grid_nodes, i, j+1) && !A_Star.cell_isBlocked(grid_nodes, i, j+1, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j+1]);
-                }
-                if(A_Star.cell_isValid(grid_nodes, i+1, j) && !A_Star.cell_isBlocked(grid_nodes, i+1, j, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i+1][j]);
-                }
+        set4Neighbours(grid_nodes, image_dict);
 
-                for(Integer key: image_dict.keySet()){
-                    if(image_dict.get(key).equals(grid_nodes[i][j].getImageView().getImage())){
-                        switch (key){
-                            case 0:
-                                grid_nodes[i][j].energy_cost = -1;
-                                break;
-                            case 2:
-                                grid_nodes[i][j].energy_cost = -50;
-                                break;
-                            case 3:
-                                grid_nodes[i][j].energy_cost = -4;
-                                break;
-                            case 4:
-                                grid_nodes[i][j].energy_cost = -8;
-                                break;
-                            case 5:
-                                grid_nodes[i][j].energy_cost = 1;
-                                break;
-                            case 6:
-                                grid_nodes[i][j].energy_cost = 5;
-                                break;
-                        }
-                    }
-                }
-            }
-        }
+        setEnergyCosts(grid_nodes, image_dict, weight_dict);
+
 
         // add all nodes in the grid to the unvisited set
         for(Cell_Node[] node_arr: grid_nodes){
@@ -204,7 +305,7 @@ public class Dijkstras {
         boolean foundDestination = false;
 
         // while there's still nodes that are univisited..
-        while(!unvisited_nodes.isEmpty() && !foundDestination){
+        while(!unvisited_nodes.isEmpty()){
 
             // set the current node to be the node with the highest gscore
             Cell_Node current = null;
@@ -219,6 +320,10 @@ public class Dijkstras {
             // remove the current node from the unvisited set
             unvisited_nodes.remove(current);
 
+            if(current == null){
+                break;
+            }
+
             // get currents position on the grid
             int[] current_pos = A_Star.identify_CellPos(current, grid_nodes);
             current.posOnGrid = current_pos;
@@ -226,9 +331,10 @@ public class Dijkstras {
 
             // check if current is our destination
             if(A_Star.cell_isDestination(grid_nodes, current_pos[0], current_pos[1], image_dict)){
-                A_Star.write_constructedPath(current, start, goal);
                 foundDestination = true;
-                break;
+                return A_Star.write_constructedPath(current, start, goal);
+//
+//                break;
             }
 
             // for each of current's neighbour, update their gscore and parents
@@ -244,8 +350,9 @@ public class Dijkstras {
 
             }
         }
-        if(unvisited_nodes.isEmpty() && !foundDestination){
+        if(!foundDestination){
             System.out.println("Could Not Find the Destination");
         }
+        return null;
     }
 }
