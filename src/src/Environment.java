@@ -1,5 +1,7 @@
 import com.sun.scenario.animation.shared.AnimationAccessor;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -7,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -15,7 +18,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.util.*;
@@ -64,6 +69,16 @@ public class Environment extends Application {
     // array of array to store the grid nodes
     Cell_Node[][] grid_nodes;
 
+    ArrayList<String> path = null;
+
+    int count = 0;
+
+    int[] clicked_pos = null;
+
+    boolean start_isClicked = false;
+
+    boolean goal_isReached = false;
+
 
     /**
         Time Complexity: O(N)
@@ -72,7 +87,7 @@ public class Environment extends Application {
      */
 
     //method to read input files and return an arraylist of arrays. Each item in the arraylist is an array of integers representing the images in a row
-    public static ArrayList<int[]> readfile(String filename) throws IOException {
+    public static ArrayList<int[]> readfile(File filename) throws IOException {
 
         //read the first line of the file input, split it at every space and convert the resulting array from a String array to an array of integers
         BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
@@ -206,8 +221,10 @@ public class Environment extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Road Runner Simulation");
 
+        File file_name = new File("C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\The Road Runner Files\\Test Inputs\\sample_test_input_1.txt");
+
         // read and store contents of the file in an arraylist of arrays
-        environ_map = readfile("C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\The Road Runner Files\\Test Inputs\\sample_test_input_1.txt");
+        environ_map = readfile(file_name);
 
         // create a hashmap of the original images
         HashMap<Integer,Image> image_dict = get_images();
@@ -218,8 +235,17 @@ public class Environment extends Application {
         // initialize the grid nodes array and make it as big as the map
         grid_nodes = new Cell_Node[environ_map.size()][environ_map.get(1).length];
 
-        int[] clicked_pos = new int[2];
+        int image_width = 20;
+        int image_height = 20;
 
+
+        HashMap<Integer,Integer> weights_dict = new HashMap<>();
+        weights_dict.put(0, -1);
+        weights_dict.put(2, -50);
+        weights_dict.put(3, -4);
+        weights_dict.put(4, -8);
+        weights_dict.put(5, 1);
+        weights_dict.put(6, 5);
 
 
         //create a new grid and position it at the center of the window
@@ -237,11 +263,13 @@ public class Environment extends Application {
                 if(environ_map.get(i)[j] == 8){
                     // initialize the runner imageview object
                     roadrunner = new ImageView(image_dict.get(7));
-                    roadrunner.setFitHeight(20);
-                    roadrunner.setFitWidth(20);
+                    roadrunner.setFitHeight(image_height);
+                    roadrunner.setFitWidth(image_width);
 
                     // initialize the runner node object
                     runner = new Cell_Node(roadrunner);
+
+                    runner.posOnGrid = new int[]{i, j};
 
                     // add the runner to the grid nodes
                     grid_nodes[i][j] = runner;
@@ -252,11 +280,17 @@ public class Environment extends Application {
                     // add the runner to the grid
                     grid.add(roadrunner, j, i);
 
+                    int finalI = i;
+                    int finalJ = j;
                     roadrunner.setOnMouseClicked(new EventHandler<MouseEvent>() {
                         @Override
                         public void handle(MouseEvent event) {
-                            clicked_pos[0] =  GridPane.getRowIndex(roadrunner);                  //(int)event.getX();
-                            clicked_pos[1] = GridPane.getColumnIndex(roadrunner);
+                            if(start_isClicked){
+                                clicked_pos = new int[]{finalI, finalJ};
+
+                                System.out.println("RoadRunner is already here");
+                            }
+
                         }
                     });
 
@@ -266,23 +300,32 @@ public class Environment extends Application {
                 else if(environ_map.get(i)[j] == 9){
                     // initialize the goal object
                     goal = new ImageView(image_dict.get(9));
-                    goal.setFitWidth(20);
-                    goal.setFitHeight(20);
+                    goal.setFitWidth(image_width);
+                    goal.setFitHeight(image_height);
 
                     // initialize the goal node object
                     goal_node = new Cell_Node(goal);
 
+                    goal_node.posOnGrid = new int[]{i,j};
+
                     // add the goal to the grid of nodes
                     grid_nodes[i][j] = goal_node;
+
 
                     // add the goal to the grid
                     grid.add(goal, j, i);
 
+                    int finalI = i;
+                    int finalJ = j;
+
                     goal.setOnMouseClicked(new EventHandler<MouseEvent>() {
                         @Override
                         public void handle(MouseEvent event) {
-                            clicked_pos[0] =  GridPane.getRowIndex(goal);                  //(int)event.getX();
-                            clicked_pos[1] = GridPane.getColumnIndex(goal);
+                            if(start_isClicked){
+                                clicked_pos = new int[]{finalI, finalJ};
+
+                                System.out.println("Cannot Set the Start at the Goal");
+                            }
                         }
                     });
                 }
@@ -290,8 +333,8 @@ public class Environment extends Application {
                 else{
                     // create a new image view of the image using the image dict hashmap
                     ImageView image = new ImageView(image_dict.get(environ_map.get(i)[j]));
-                    image.setFitHeight(20);
-                    image.setFitWidth(20);
+                    image.setFitHeight(image_height);
+                    image.setFitWidth(image_width);
 
                     // create a node object of the image
                     Cell_Node image_node = new Cell_Node(image);
@@ -302,11 +345,29 @@ public class Environment extends Application {
                     // add the image to the grid
                     grid.add(image, j, i);
 
+                    int finalI = i;
+                    int finalJ = j;
+
                     image.setOnMouseClicked(new EventHandler<MouseEvent>() {
                         @Override
                         public void handle(MouseEvent event) {
-                            clicked_pos[0] =  GridPane.getRowIndex(image);                  //(int)event.getX();
-                            clicked_pos[1] = GridPane.getColumnIndex(image);
+                            if(start_isClicked){
+                                clicked_pos = new int[]{finalI, finalJ};
+
+                                int x = getRunner_Xpos(roadrunner);
+                                int y = getRunner_Ypos(roadrunner);
+                                Runner_Movement.replace_image(grid, roadrunner, environ_map, image_dict, x, y, grid_nodes);
+                                grid.add(roadrunner, clicked_pos[1], clicked_pos[0]);
+
+                                for(int i=0; i < visited_cells.size(); i++){
+                                    if(visited_cells.get(i)[0] == x && visited_cells.get(i)[1] == y){
+                                        visited_cells.remove(visited_cells.get(i));
+                                    }
+                                }
+                                visited_cells.add(clicked_pos);
+                            }
+
+                            grid_nodes[finalI][finalJ] = runner;
                         }
                     });
                 }
@@ -433,24 +494,33 @@ public class Environment extends Application {
 
                     // check that the redo recent moves stack is not empty
                     if (!redo_recent_moves.isEmpty()) {
+                        if(count_undos > 0){
+                            count_undos -= 1;
+                        }
+                        // enable the undo button
+                        undo.setDisable(false);
+
                         // store the redone move in an array
                         redone = redo_move(grid, redo_recent_moves, roadrunner, image_alt_dict, environ_map, visited_cells);
 
                         // add it to the recent moves stack
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
 
+                        visited_cells.add(redone);
+
                         // enable the undo button
-                        undo.setDisable(false);
+//                        undo.setDisable(false);
 
 
                         // check if redo recent moves is empty. if so disable the redo button
                         if (redo_recent_moves.isEmpty()) {
-                            redo.setDisable(true);
+                            redo.setDisable(false);
                         }
                     }
 
                     // if empty, display a warning
                     else {
+                        redo.setDisable(true);
                         System.out.println("Cannot Redo");
                     }
 
@@ -536,7 +606,6 @@ public class Environment extends Application {
              */
             public void handle(ActionEvent event) {
                 // reset the member variables of the environment
-//                roadrunner = null;
                 clicks = 0;
                 enable_8 = false;
                 count_undos = 0;
@@ -545,6 +614,10 @@ public class Environment extends Application {
                 redo_recent_moves = new Stack<>();
                 recent_action = null;
                 score = 0;
+                count = 0;
+                clicked_pos = null;
+                start_isClicked = false;
+                path = null;
 
                 // delete all images from the grid before adding new Imageviews
                 grid.getChildren().removeAll();
@@ -561,28 +634,83 @@ public class Environment extends Application {
                     for(int j=0; j < environ_map.get(i).length; j++){
                         if(environ_map.get(i)[j] == 8){
                             roadrunner = new ImageView(image_dict.get(7));
-                            roadrunner.setFitHeight(20);
-                            roadrunner.setFitWidth(20);
+                            roadrunner.setFitHeight(image_height);
+                            roadrunner.setFitWidth(image_width);
                             runner = new Cell_Node(roadrunner);
                             visited_cells.add(new int[]{i, j});
                             grid.add(roadrunner, j, i);
                             grid_nodes[i][j] = runner;
+
+                            int finalI = i;
+                            int finalJ = j;
+
+                            roadrunner.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                @Override
+                                public void handle(MouseEvent event) {
+                                    if(start_isClicked){
+                                        clicked_pos = new int[]{finalI, finalJ};
+
+                                        System.out.println("RoadRunner is already here");
+                                    }
+
+                                }
+                            });
                         }
                         else if(environ_map.get(i)[j] == 9){
                             goal = new ImageView(image_dict.get(9));
-                            goal.setFitWidth(20);
-                            goal.setFitHeight(20);
+                            goal.setFitWidth(image_width);
+                            goal.setFitHeight(image_height);
                             goal_node = new Cell_Node(goal);
                             grid.add(goal, j, i);
                             grid_nodes[i][j] = goal_node;
+
+                            int finalI = i;
+                            int finalJ = j;
+
+                            goal.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                @Override
+                                public void handle(MouseEvent event) {
+                                    if(start_isClicked){
+                                        clicked_pos = new int[]{finalI, finalJ};
+
+                                        System.out.println("Cannot Set the Start at the Goal");
+                                    }
+                                }
+                            });
                         }
                         else{
                             ImageView image = new ImageView(image_dict.get(environ_map.get(i)[j]));
-                            image.setFitHeight(20);
-                            image.setFitWidth(20);
+                            image.setFitHeight(image_height);
+                            image.setFitWidth(image_width);
                             Cell_Node image_node = new Cell_Node(image);
                             grid.add(image, j, i);
                             grid_nodes[i][j] = image_node;
+
+                            int finalI = i;
+                            int finalJ = j;
+
+                            image.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                @Override
+                                public void handle(MouseEvent event) {
+                                    if(start_isClicked){
+                                        clicked_pos = new int[]{finalI, finalJ};
+
+                                        int x = getRunner_Xpos(roadrunner);
+                                        int y = getRunner_Ypos(roadrunner);
+                                        Runner_Movement.replace_image(grid, roadrunner, environ_map, image_dict, x, y, grid_nodes);
+                                        grid.add(roadrunner, clicked_pos[1], clicked_pos[0]);
+
+                                        for(int i=0; i < visited_cells.size(); i++){
+                                            if(visited_cells.get(i)[0] == x && visited_cells.get(i)[1] == y){
+                                                visited_cells.remove(visited_cells.get(i));
+                                            }
+                                        }
+                                        visited_cells.add(clicked_pos);
+                                    }
+
+                                    grid_nodes[finalI][finalJ] = runner;
+                                }
+                            });
                         }
                     }
                 }
@@ -597,6 +725,14 @@ public class Environment extends Application {
         Button solve_dijkstra = new Button("Solve with Dijkstra");
         Button solve_dfs = new Button("Solve with DFS");
 
+
+        Timeline astarTimeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
+            score = move_with_algorithm(grid, roadrunner, goal, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score, count, goal_isReached);
+            count += 1;
+            score_label.setText("SCORE: " + score);
+            })
+        );
+
         solve_A_star.setOnAction(new EventHandler<ActionEvent>() {
             @SuppressWarnings("Duplicates")
             @Override
@@ -606,53 +742,39 @@ public class Environment extends Application {
              Auxiliary Space: O(1)
              */
             public void handle(ActionEvent event) {
+//                ArrayList<String> path = null;
                 if (enable_8) {
                     try {
-                        A_Star.A_StarSearch_8D(grid_nodes, runner, goal_node, image_dict);
+                        path = A_Star.A_StarSearch_8D(grid_nodes, runner, goal_node, image_dict);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 } else {
                     try {
-                        A_Star.A_StarSearch_4D(grid_nodes, runner, goal_node, image_dict);
+                        path = A_Star.A_StarSearch_4D(grid_nodes, runner, goal_node, image_dict);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
 
-                try {
-                    BufferedReader bufferedReader = new BufferedReader(new FileReader("C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\output_runner_path.txt"));
-                    String line;
-                    ArrayList<String> path = new ArrayList<>();
-
-                    String[] start_dets = bufferedReader.readLine().split(" ");
-                    String[] goal_dets = bufferedReader.readLine().split(" ");
-
-                    int x_pos = Integer.parseInt(goal_dets[1]);
-                    int y_pos = Integer.parseInt(goal_dets[2]);
-
-                    ImageView new_runner = new ImageView(image_dict.get(7));
-                    grid.add(new_runner, y_pos, x_pos);
-
-                    score = move_with_algorithm(grid, roadrunner, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score);
-                    score_label.setText("SCORE: " + score);
-
-                    grid.getChildren().remove(new_runner);
-
-                    while ((line = bufferedReader.readLine()) != null) {
-                        path.add(line);
-                    }
-
-                    score = move_with_algorithm(grid, roadrunner, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score);
-                    score_label.setText("SCORE: " + score);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(path != null){
+                    astarTimeline.setCycleCount(path.size());
+                    astarTimeline.play();
                 }
+
+                count = 0;
+
           }
 
         });
 
+
+        Timeline dijkstraTimeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
+            score = move_with_algorithm(grid, roadrunner,goal, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score, count, goal_isReached);
+            count += 1;
+            score_label.setText("SCORE: " + score);
+        })
+        );
 
         solve_dijkstra.setOnAction(new EventHandler<ActionEvent>() {
             @SuppressWarnings("Duplicates")
@@ -665,48 +787,62 @@ public class Environment extends Application {
             public void handle(ActionEvent event) {
                 if (enable_8) {
                     try {
-                        Dijkstras.Dijkstras_Search_8D(grid_nodes, runner, goal_node, image_dict);
+                        path = Dijkstras.Dijkstras_Search_8D(grid_nodes, runner, goal_node, image_dict, weights_dict);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 } else {
                     try {
-                        Dijkstras.Dijkstras_Search_4D(grid_nodes, runner, goal_node, image_dict);
+                        path = Dijkstras.Dijkstras_Search_4D(grid_nodes, runner, goal_node, image_dict, weights_dict);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-                try {
-                    BufferedReader bufferedReader = new BufferedReader(new FileReader("C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\output_runner_path.txt"));
-                    String line;
-                    ArrayList<String> path = new ArrayList<>();
 
-                    String[] start_dets = bufferedReader.readLine().split(" ");
-                    String[] goal_dets = bufferedReader.readLine().split(" ");
-
-                    int x_pos = Integer.parseInt(goal_dets[1]);
-                    int y_pos = Integer.parseInt(goal_dets[2]);
-
-                    ImageView new_runner = new ImageView(image_dict.get(7));
-                    grid.add(new_runner, y_pos, x_pos);
-
-                    score = move_with_algorithm(grid, roadrunner, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score);
-                    score_label.setText("SCORE: " + score);
-
-                    grid.getChildren().remove(new_runner);
-
-                    while ((line = bufferedReader.readLine()) != null) {
-                        path.add(line);
-                    }
-
-                    score = move_with_algorithm(grid, roadrunner, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score);
-                    score_label.setText("SCORE: " + score);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(path != null){
+                    dijkstraTimeline.setCycleCount(path.size());
+                    dijkstraTimeline.play();
                 }
+
+                count = 0;
             }
 
+        });
+
+
+        Timeline dfsTimeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
+            score = move_with_algorithm(grid, roadrunner, goal, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score, count, goal_isReached);
+            count += 1;
+            score_label.setText("SCORE: " + score);
+
+            })
+        );
+
+        solve_dfs.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(enable_8){
+                    try {
+                        path = Depth_First_Search.Depth_First_Search_8D(grid_nodes, runner, goal_node, image_dict);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else{
+                    try {
+                        path = Depth_First_Search.Depth_First_Search_4D(grid_nodes, runner, goal_node, image_dict);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(path != null){
+                    dfsTimeline.setCycleCount(path.size());
+                    dfsTimeline.play();
+                }
+
+                count = 0;
+            }
         });
 
         // create buttons to manipulate the GUI
@@ -728,10 +864,7 @@ public class Environment extends Application {
              Auxiliary Space: O(1)
              */
             public void handle(ActionEvent event) {
-                System.out.println(Arrays.toString(clicked_pos));
-                grid.getChildren().remove(roadrunner);
-                grid.add(roadrunner, clicked_pos[1], clicked_pos[0]);
-
+                start_isClicked = true;
             }
         });
 
@@ -744,115 +877,218 @@ public class Environment extends Application {
              Auxiliary Space: O(N)
              */
             public void handle(ActionEvent event) {
-                System.out.println("Kindly input the path to the new map below");
-                Scanner scanner = new Scanner(System.in);
+//                System.out.println("Kindly input the path to the new map below");
+//                Scanner scanner = new Scanner(System.in);
+//
+//                String file_path = scanner.nextLine();
 
-                String file_path = scanner.nextLine();
+                FileChooser fileChooser = new FileChooser();
 
-                try {
-                    environ_map = readfile(file_path);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                grid_nodes = new Cell_Node[environ_map.size()][environ_map.get(1).length];
-                enable_8 = false;
-                count_undos = 0;
-                visited_cells = new ArrayList<>();
-                recent_moves = new Stack<>();
-                redo_recent_moves = new Stack<>();
-                recent_action = null;
-                score = 0;
+                File load_file = fileChooser.showOpenDialog(primaryStage);
 
-                for(int i=0; i < environ_map.size(); i++){
-                    for(int j=0; j < environ_map.get(i).length; j++){
+                if(load_file != null){
+                    try {
+                        environ_map = readfile(load_file);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-                        // check if the map value represents the start position. If so, put the runner at the start position
-                        if(environ_map.get(i)[j] == 8){
-                            // initialize the runner imageview object
-                            roadrunner = new ImageView(image_dict.get(7));
-                            roadrunner.setFitHeight(20);
-                            roadrunner.setFitWidth(20);
+                    grid_nodes = new Cell_Node[environ_map.size()][environ_map.get(1).length];
+                    enable_8 = false;
+                    count_undos = 0;
+                    visited_cells = new ArrayList<>();
+                    recent_moves = new Stack<>();
+                    redo_recent_moves = new Stack<>();
+                    recent_action = null;
+                    score = 0;
 
-                            // initialize the runner node object
-                            runner = new Cell_Node(roadrunner);
+                    for(int i=0; i < environ_map.size(); i++){
+                        for(int j=0; j < environ_map.get(i).length; j++){
 
-                            // add the runner to the grid nodes
-                            grid_nodes[i][j] = runner;
+                            // check if the map value represents the start position. If so, put the runner at the start position
+                            if(environ_map.get(i)[j] == 8){
+                                // initialize the runner imageview object
+                                roadrunner = new ImageView(image_dict.get(7));
+                                roadrunner.setFitHeight(image_height);
+                                roadrunner.setFitWidth(image_width);
 
-                            // add the runner's start position to the visited cells list
-                            visited_cells.add(new int[]{i, j});
+                                // initialize the runner node object
+                                runner = new Cell_Node(roadrunner);
 
-                            // add the runner to the grid
-                            grid.add(roadrunner, j, i);
+                                // add the runner to the grid nodes
+                                grid_nodes[i][j] = runner;
 
-                            roadrunner.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                                @Override
-                                public void handle(MouseEvent event) {
-                                    clicked_pos[0] =  GridPane.getRowIndex(roadrunner);                  //(int)event.getX();
-                                    clicked_pos[1] = GridPane.getColumnIndex(roadrunner);
-                                }
-                            });
+                                // add the runner's start position to the visited cells list
+                                visited_cells.add(new int[]{i, j});
 
-                        }
+                                // add the runner to the grid
+                                grid.add(roadrunner, j, i);
 
-                        //check if the map value reps the goal position
-                        else if(environ_map.get(i)[j] == 9){
-                            // initialize the goal object
-                            goal = new ImageView(image_dict.get(9));
-                            goal.setFitWidth(20);
-                            goal.setFitHeight(20);
+                                int finalI = i;
+                                int finalJ = j;
 
-                            // initialize the goal node object
-                            goal_node = new Cell_Node(goal);
+                                roadrunner.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                    @Override
+                                    public void handle(MouseEvent event) {
+                                        if(start_isClicked){
+                                            clicked_pos = new int[]{finalI, finalJ};
 
-                            // add the goal to the grid of nodes
-                            grid_nodes[i][j] = goal_node;
+                                            System.out.println("RoadRunner is already here");
+                                        }
 
-                            // add the goal to the grid
-                            grid.add(goal, j, i);
+                                    }
+                                });
+                            }
 
-                            goal.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                                @Override
-                                public void handle(MouseEvent event) {
-                                    clicked_pos[0] =  GridPane.getRowIndex(goal);                  //(int)event.getX();
-                                    clicked_pos[1] = GridPane.getColumnIndex(goal);
-                                }
-                            });
-                        }
+                            //check if the map value reps the goal position
+                            else if(environ_map.get(i)[j] == 9){
+                                // initialize the goal object
+                                goal = new ImageView(image_dict.get(9));
+                                goal.setFitWidth(image_width);
+                                goal.setFitHeight(image_height);
 
-                        else{
-                            // create a new image view of the image using the image dict hashmap
-                            ImageView image = new ImageView(image_dict.get(environ_map.get(i)[j]));
-                            image.setFitHeight(20);
-                            image.setFitWidth(20);
+                                // initialize the goal node object
+                                goal_node = new Cell_Node(goal);
 
-                            // create a node object of the image
-                            Cell_Node image_node = new Cell_Node(image);
+                                // add the goal to the grid of nodes
+                                grid_nodes[i][j] = goal_node;
 
-                            // add the node object to the grid nodes
-                            grid_nodes[i][j] = image_node;
+                                // add the goal to the grid
+                                grid.add(goal, j, i);
 
-                            // add the image to the grid
-                            grid.add(image, j, i);
+                                int finalI = i;
+                                int finalJ = j;
 
-                            image.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                                @Override
-                                public void handle(MouseEvent event) {
-                                    clicked_pos[0] =  GridPane.getRowIndex(image);                  //(int)event.getX();
-                                    clicked_pos[1] = GridPane.getColumnIndex(image);
-                                }
-                            });
+                                goal.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                    @Override
+                                    public void handle(MouseEvent event) {
+                                        if(start_isClicked){
+                                            clicked_pos = new int[]{finalI, finalJ};
+
+                                            System.out.println("Cannot Set the Start at the Goal");
+                                        }
+                                    }
+                                });
+                            }
+
+                            else{
+                                // create a new image view of the image using the image dict hashmap
+                                ImageView image = new ImageView(image_dict.get(environ_map.get(i)[j]));
+                                image.setFitHeight(image_height);
+                                image.setFitWidth(image_width);
+
+                                // create a node object of the image
+                                Cell_Node image_node = new Cell_Node(image);
+
+                                // add the node object to the grid nodes
+                                grid_nodes[i][j] = image_node;
+
+                                // add the image to the grid
+                                grid.add(image, j, i);
+
+                                int finalI = i;
+                                int finalJ = j;
+
+                                image.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                    @Override
+                                    public void handle(MouseEvent event) {
+                                        if(start_isClicked){
+                                            clicked_pos = new int[]{finalI, finalJ};
+
+                                            int x = getRunner_Xpos(roadrunner);
+                                            int y = getRunner_Ypos(roadrunner);
+                                            Runner_Movement.replace_image(grid, roadrunner, environ_map, image_dict, x, y, grid_nodes);
+                                            grid.add(roadrunner, clicked_pos[1], clicked_pos[0]);
+
+                                            for(int i=0; i < visited_cells.size(); i++){
+                                                if(visited_cells.get(i)[0] == x && visited_cells.get(i)[1] == y){
+                                                    visited_cells.remove(visited_cells.get(i));
+                                                }
+                                            }
+                                            visited_cells.add(clicked_pos);
+                                        }
+
+                                        grid_nodes[finalI][finalJ] = runner;
+                                    }
+                                });
+                            }
                         }
                     }
                 }
-//                roadrunner = null;
+            }
+        });
+
+        VBox weight_area = new VBox();
+        weight_area.setAlignment(Pos.CENTER_LEFT);
+        weight_area.setSpacing(2);
 
 
+        change_weights.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Label road_label = new Label("Road: ");
+                TextField road_weight_text = new TextField();
+
+                Label pothole_label = new Label("Pothole: ");
+                TextField pothole_weight_text = new TextField();
+
+                Label explosive_label = new Label("Explosive: ");
+                TextField explosive_weight_text = new TextField();
+
+                Label coyote_label = new Label("Coyote: ");
+                TextField coyote_weight_text = new TextField();
+
+                Label tarred_label = new Label("Tarred: ");
+                TextField tarred_weight_text = new TextField();
+
+                Label gold_label = new Label("Gold: ");
+                TextField gold_weight_text = new TextField();
+
+                Button submit = new Button("Update Weights");
+
+                weight_area.getChildren().addAll(road_label, road_weight_text, pothole_label, pothole_weight_text, explosive_label, explosive_weight_text, coyote_label, coyote_weight_text, tarred_label, tarred_weight_text, gold_label, gold_weight_text, submit);
+
+                submit.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        if(!road_weight_text.getText().equals("")){
+                            weights_dict.put(0, Integer.parseInt(road_weight_text.getText()));
+                        }
+
+                        if(!pothole_weight_text.getText().equals("")){
+                            weights_dict.put(2, Integer.parseInt(pothole_weight_text.getText()));
+                        }
+
+                        if(!explosive_weight_text.getText().equals("")){
+                            weights_dict.put(3, Integer.parseInt(explosive_weight_text.getText()));
+
+                        }
+
+                        if(!coyote_weight_text.getText().equals("")){
+                            weights_dict.put(4, Integer.parseInt(coyote_weight_text.getText()));
+
+                        }
+
+                        if(!tarred_weight_text.getText().equals("")){
+                            weights_dict.put(5, Integer.parseInt(tarred_weight_text.getText()));
+
+                        }
+
+                        if(!gold_weight_text.getText().equals("")){
+                            weights_dict.put(6, Integer.parseInt(gold_weight_text.getText()));
+
+                        }
+
+                        System.out.println(weights_dict);
+
+                        weight_area.getChildren().removeAll(road_label, road_weight_text, pothole_label, pothole_weight_text, explosive_label, explosive_weight_text, coyote_label, coyote_weight_text, tarred_label, tarred_weight_text, gold_label, gold_weight_text, submit);
+                    }
+                });
             }
         });
 
 
-        // Organize all the items on the display window (scene)
+//         Organize all the items on the display window (scene)
         score_label.setAlignment(Pos.TOP_LEFT);
 
         HBox hBox_top = new HBox();
@@ -875,9 +1111,14 @@ public class Environment extends Application {
         vBox.setSpacing(15);
         vBox.getChildren().addAll(score_label, hBox_top, grid, hBox_bottom, hBox_bottom2);
 
+        HBox hBox_game = new HBox();
+        hBox_game.setAlignment(Pos.CENTER);
+        hBox_game.setSpacing(25);
+        hBox_game.getChildren().addAll(weight_area, vBox);
+
 
         //create a scene and add it to the stage
-        Scene scene = new Scene(vBox, 800, 700);
+        Scene scene = new Scene(hBox_game, 800, 700);
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
@@ -888,105 +1129,48 @@ public class Environment extends Application {
              Auxiliary Space: O(1)
              */
             public void handle(KeyEvent event) {
-                // array to store the new position of the runner
-                int[] new_pos = null;
+                if(!goal_isReached){
+                    // array to store the new position of the runner
+                    int[] new_pos = null;
 
-                // if UP key is pressed
-                if(event.getCode() == KeyCode.UP){
-                    // if the user has already undone some moves, reduce the possible number of undos they can make by one
-                    if(count_undos > 0){
-                        count_undos -= 1;
+                    // if UP key is pressed
+                    if(event.getCode() == KeyCode.UP){
+                        // if the user has already undone some moves, reduce the possible number of undos they can make by one
+                        if(count_undos > 0){
+                            count_undos -= 1;
+                        }
+                        // enable the undo button
+                        undo.setDisable(false);
+
+                        // store the runner's new position in an array
+                        new_pos = Runner_Movement.moveUp(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+
+                        // if the new position is not null, i.e the runner moved despite the restrictions set in the upward movement
+                        if(new_pos != null){
+                            grid_nodes[new_pos[0]][new_pos[1]] = runner;
+                            runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
+
+                            // add his last position to the recent moves
+                            recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+
+                            // add his new position in the visited cells
+                            visited_cells.add(new_pos);
+
+                            // update the user's last action to be move up
+                            recent_action = "up";
+
+                            if(new_pos[0] == getRunner_Xpos(goal) && new_pos[1] == getRunner_Ypos(goal)){
+                                goal_isReached = true;
+                            }
+                        }
                     }
-                    // enable the undo button
-                    undo.setDisable(false);
-
-                    // store the runner's new position in an array
-                    new_pos = Runner_Movement.moveUp(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-//                    grid_nodes[][] = runner;
-//                    runner.posOnGrid;// = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
-//                    grid_nodes.
-
-
-                    // if the new position is not null, i.e the runner moved despite the restrictions set in the upward movement
-                    if(new_pos != null){
-                        grid_nodes[new_pos[0]][new_pos[1]] = runner;
-                        runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
-
-
-                        // add his last position to the recent moves
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-
-                        // add his new position in the visited cells
-                        visited_cells.add(new_pos);
-
-                        // update the user's last action to be move up
-                        recent_action = "up";
-                   }
-                }
-                // check if key pressed is DOWN and move runner down. update the recent moves stack, the visited cells list and recent action
-                else if(event.getCode() == KeyCode.DOWN){
-                    if(count_undos > 0){
-                        count_undos -= 1;
-                    }
-                    undo.setDisable(false);
-                    new_pos = Runner_Movement.moveDown(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
-
-                    if(new_pos != null){
-                        grid_nodes[new_pos[0]][new_pos[1]] = runner;
-                        runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
-
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        visited_cells.add(new_pos);
-                        recent_action = "down";
-                    }
-                }
-                // check if key pressed is LEFT and move runner left. update the recent moves stack, the visited cells list and recent action
-                else if(event.getCode() == KeyCode.LEFT){
-                    if(count_undos > 0){
-                        count_undos -= 1;
-                    }
-                    undo.setDisable(false);
-                    new_pos = Runner_Movement.moveLeft(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
-
-                    if(new_pos != null){
-                        grid_nodes[new_pos[0]][new_pos[1]] = runner;
-                        runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
-
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        visited_cells.add(new_pos);
-                        recent_action = "left";
-                    }
-                }
-                // check if key pressed is RIGHT and move runner right. update the recent moves stack, the visited cells list and recent action
-                else if(event.getCode() == KeyCode.RIGHT){
-                    if(count_undos > 0){
-                        count_undos -= 1;
-                    }
-                    undo.setDisable(false);
-                    new_pos = Runner_Movement.moveRight(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
-
-                    if(new_pos != null){
-                        grid_nodes[new_pos[0]][new_pos[1]] = runner;
-                        runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
-
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        visited_cells.add(new_pos);
-                        recent_action = "right";
-                    }
-                }
-
-                // check if the user has enabled 8 directional movement, if so check which diagonal direction the user wants to move
-                if(enable_8){
-                    // check if key pressed is W and move runner north east. update the recent moves stack, the visited cells list and recent action
-                    if(event.getCode() == KeyCode.W){
+                    // check if key pressed is DOWN and move runner down. update the recent moves stack, the visited cells list and recent action
+                    else if(event.getCode() == KeyCode.DOWN){
                         if(count_undos > 0){
                             count_undos -= 1;
                         }
                         undo.setDisable(false);
-                        new_pos = Runner_Movement.moveNorthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                        new_pos = Runner_Movement.moveDown(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                         runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
 
                         if(new_pos != null){
@@ -995,16 +1179,20 @@ public class Environment extends Application {
 
                             recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                             visited_cells.add(new_pos);
-                            recent_action = "north east";
+                            recent_action = "down";
+
+                            if(new_pos[0] == getRunner_Xpos(goal) && new_pos[1] == getRunner_Ypos(goal)){
+                                goal_isReached = true;
+                            }
                         }
                     }
-                    // check if key pressed is S and move runner south east. update the recent moves stack, the visited cells list and recent action
-                    else if(event.getCode() == KeyCode.S){
+                    // check if key pressed is LEFT and move runner left. update the recent moves stack, the visited cells list and recent action
+                    else if(event.getCode() == KeyCode.LEFT){
                         if(count_undos > 0){
                             count_undos -= 1;
                         }
                         undo.setDisable(false);
-                        new_pos = Runner_Movement.moveSouthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                        new_pos = Runner_Movement.moveLeft(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                         runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
 
                         if(new_pos != null){
@@ -1013,16 +1201,20 @@ public class Environment extends Application {
 
                             recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                             visited_cells.add(new_pos);
-                            recent_action = "south east";
+                            recent_action = "left";
+
+                            if(new_pos[0] == getRunner_Xpos(goal) && new_pos[1] == getRunner_Ypos(goal)){
+                                goal_isReached = true;
+                            }
                         }
                     }
-                    // check if key pressed is Q and move runner north west. update the recent moves stack, the visited cells list and recent action
-                    else if(event.getCode() == KeyCode.Q){
+                    // check if key pressed is RIGHT and move runner right. update the recent moves stack, the visited cells list and recent action
+                    else if(event.getCode() == KeyCode.RIGHT){
                         if(count_undos > 0){
                             count_undos -= 1;
                         }
                         undo.setDisable(false);
-                        new_pos = Runner_Movement.moveNorthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                        new_pos = Runner_Movement.moveRight(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                         runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
 
                         if(new_pos != null){
@@ -1031,32 +1223,110 @@ public class Environment extends Application {
 
                             recent_moves.push(visited_cells.get(visited_cells.size() - 1));
                             visited_cells.add(new_pos);
-                            recent_action = "north west";
+                            recent_action = "right";
+
+                            if(new_pos[0] == getRunner_Xpos(goal) && new_pos[1] == getRunner_Ypos(goal)){
+                                goal_isReached = true;
+                            }
                         }
                     }
-                    // check if key pressed is A and move runner south west. update the recent moves stack, the visited cells list and recent action
-                    else if(event.getCode() == KeyCode.A){
-                        if(count_undos > 0){
-                            count_undos -= 1;
+
+                    // check if the user has enabled 8 directional movement, if so check which diagonal direction the user wants to move
+                    if(enable_8){
+                        // check if key pressed is W and move runner north east. update the recent moves stack, the visited cells list and recent action
+                        if(event.getCode() == KeyCode.W){
+                            if(count_undos > 0){
+                                count_undos -= 1;
+                            }
+                            undo.setDisable(false);
+                            new_pos = Runner_Movement.moveNorthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                            runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
+
+                            if(new_pos != null){
+                                grid_nodes[new_pos[0]][new_pos[1]] = runner;
+                                runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
+
+                                recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                                visited_cells.add(new_pos);
+                                recent_action = "north east";
+
+                                if(new_pos[0] == getRunner_Xpos(goal) && new_pos[1] == getRunner_Ypos(goal)){
+                                    goal_isReached = true;
+                                }
+                            }
                         }
-                        undo.setDisable(false);
-                        new_pos = Runner_Movement.moveSouthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                        runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
+                        // check if key pressed is S and move runner south east. update the recent moves stack, the visited cells list and recent action
+                        else if(event.getCode() == KeyCode.S){
+                            if(count_undos > 0){
+                                count_undos -= 1;
+                            }
+                            undo.setDisable(false);
+                            new_pos = Runner_Movement.moveSouthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                            runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
 
-                        if(new_pos != null){
-                            grid_nodes[new_pos[0]][new_pos[1]] = runner;
-                            runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
+                            if(new_pos != null){
+                                grid_nodes[new_pos[0]][new_pos[1]] = runner;
+                                runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
 
-                            recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                            visited_cells.add(new_pos);
-                            recent_action = "south west";
+                                recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                                visited_cells.add(new_pos);
+                                recent_action = "south east";
+
+                                if(new_pos[0] == getRunner_Xpos(goal) && new_pos[1] == getRunner_Ypos(goal)){
+                                    goal_isReached = true;
+                                }
+                            }
+                        }
+                        // check if key pressed is Q and move runner north west. update the recent moves stack, the visited cells list and recent action
+                        else if(event.getCode() == KeyCode.Q){
+                            if(count_undos > 0){
+                                count_undos -= 1;
+                            }
+                            undo.setDisable(false);
+                            new_pos = Runner_Movement.moveNorthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                            runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
+
+                            if(new_pos != null){
+                                grid_nodes[new_pos[0]][new_pos[1]] = runner;
+                                runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
+
+                                recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                                visited_cells.add(new_pos);
+                                recent_action = "north west";
+
+                                if(new_pos[0] == getRunner_Xpos(goal) && new_pos[1] == getRunner_Ypos(goal)){
+                                    goal_isReached = true;
+                                }
+                            }
+                        }
+                        // check if key pressed is A and move runner south west. update the recent moves stack, the visited cells list and recent action
+                        else if(event.getCode() == KeyCode.A){
+                            if(count_undos > 0){
+                                count_undos -= 1;
+                            }
+                            undo.setDisable(false);
+                            new_pos = Runner_Movement.moveSouthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                            runner.posOnGrid = new int[]{getRunner_Xpos(roadrunner), getRunner_Ypos(roadrunner)};
+
+                            if(new_pos != null){
+                                grid_nodes[new_pos[0]][new_pos[1]] = runner;
+                                runner.posOnGrid = new int[]{new_pos[0], new_pos[1]};
+
+                                recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                                visited_cells.add(new_pos);
+                                recent_action = "south west";
+
+                                if(new_pos[0] == getRunner_Xpos(goal) && new_pos[1] == getRunner_Ypos(goal)){
+                                    goal_isReached = true;
+                                }
+                            }
                         }
                     }
+
+                    score = get_score(score, new_pos, environ_map);
+                    score_label.setText("SCORE: " + score);
+
                 }
-
-                score = get_score(score, new_pos, environ_map);
-                score_label.setText("SCORE: " + score);
-
             }
         });
 
@@ -1084,8 +1354,8 @@ public class Environment extends Application {
         // get the key of the image where the is currently at
         int prev_image_key = map.get(runner_xpos)[runner_ypos];
         ImageView newView = new ImageView(image_dict.get(prev_image_key));
-        newView.setFitWidth(100);
-        newView.setFitHeight(100);
+        newView.setFitWidth(20);
+        newView.setFitHeight(20);
 
         // update the image at the current runner's position
         grid.add(newView, runner_ypos, runner_xpos);
@@ -1120,8 +1390,8 @@ public class Environment extends Application {
         // get the key of the image where the is currently at
         int next_image_key = map.get(runner_xpos)[runner_ypos];
         ImageView imageView = new ImageView(image_alt_dict.get(next_image_key));
-        imageView.setFitHeight(100);
-        imageView.setFitWidth(100);
+        imageView.setFitHeight(20);
+        imageView.setFitWidth(20);
 
         // update the image at the current runner's position
         grid.add(imageView, runner_ypos, runner_xpos);
@@ -1133,7 +1403,7 @@ public class Environment extends Application {
         grid.add(runner, y, x);
 
         // update the visited cells list witht the redone move
-        visited_cells.add(redo_pos);
+//        visited_cells.add(redo_pos);
 
         // return the redone move
         return redo_pos;
@@ -1145,103 +1415,98 @@ public class Environment extends Application {
      Auxiliary Space: O(N)
      */
     // function to move the runner on the grid based on the path determined by the algorithms defined above. Returns the score of the route
-    public static int move_with_algorithm(GridPane grid, ImageView roadrunner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> environ_map, ArrayList<int[]> visited_cells, Stack<int[]> recent_moves, ArrayList<String> path, Cell_Node[][] grid_nodes, int score){
+    public static int move_with_algorithm(GridPane grid, ImageView roadrunner, ImageView goal, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> environ_map, ArrayList<int[]> visited_cells, Stack<int[]> recent_moves, ArrayList<String> path, Cell_Node[][] grid_nodes, int score, int count, boolean goal_isReached){
 
-        // delay the for loop by 500 milliseconds so we can see the runner trace its path to the goal
-            for (String direction : path) {
+            // move the runner up when the direction says north from his position
+            if (path.get(count).trim().equals("North")) {
+                int[] new_pos = Runner_Movement.moveUp(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
 
-                // move the runner up when the direction says north from his position
-                if (direction.trim().equals("North")) {
-                    int[] new_pos = Runner_Movement.moveUp(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                // if the new position is not null, i.e the runner moved despite the restrictions set in the upward movement
+                if (new_pos != null) {
+                    // add his last position to the recent moves
+                    recent_moves.push(visited_cells.get(visited_cells.size() - 1));
 
-                    // if the new position is not null, i.e the runner moved despite the restrictions set in the upward movement
-                    if (new_pos != null) {
-                        // add his last position to the recent moves
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                    // update the score
+                    score = get_score(score, new_pos, environ_map);
 
-                        // update the score
-                        score = get_score(score, new_pos, environ_map);
-
-                        // add his new position in the visited cells
-                        visited_cells.add(new_pos);
-                    }
+                    // add his new position in the visited cells
+                    visited_cells.add(new_pos);
 
                 }
-                // move the runner left when the direction says east from his position
-                else if (direction.trim().equals("East")) {
-                    int[] new_pos = Runner_Movement.moveRight(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    if (new_pos != null) {
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        score = get_score(score, new_pos, environ_map);
-                        visited_cells.add(new_pos);
-                    }
-                }
-                // move the runner down when the direction says south from his position
-                else if (direction.trim().equals("South")) {
-                    int[] new_pos = Runner_Movement.moveDown(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    if (new_pos != null) {
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        score = get_score(score, new_pos, environ_map);
-                        visited_cells.add(new_pos);
-                    }
-                }
-                // move the runner left when the direction says west from his position
-                else if (direction.trim().equals("West")) {
-                    int[] new_pos = Runner_Movement.moveLeft(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    if (new_pos != null) {
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        score = get_score(score, new_pos, environ_map);
-                        visited_cells.add(new_pos);
-                    }
-                }
-                // move the runner north east when the directions says north east
-                else if (direction.trim().equals("North East")) {
-                    int[] new_pos = Runner_Movement.moveNorthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    if (new_pos != null) {
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        score = get_score(score, new_pos, environ_map);
-                        visited_cells.add(new_pos);
-                    }
-                }
-                // move the runner north west when the directions says north west
-                else if (direction.trim().equals("North West")) {
-                    int[] new_pos = Runner_Movement.moveNorthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    if (new_pos != null) {
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        score = get_score(score, new_pos, environ_map);
-                        visited_cells.add(new_pos);
-                    }
-                }
-                // move the runner south east when the directions says south east
-                else if (direction.trim().equals("South East")) {
-                    int[] new_pos = Runner_Movement.moveSouthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    if (new_pos != null) {
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        score = get_score(score, new_pos, environ_map);
-                        visited_cells.add(new_pos);
-                    }
-                }
-                // move the runner south west when the directions says south west
-                else if (direction.trim().equals("South West")) {
-                    int[] new_pos = Runner_Movement.moveSouthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
-                    if (new_pos != null) {
-                        recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                        score = get_score(score, new_pos, environ_map);
-                        visited_cells.add(new_pos);
-                    }
-                }
 
-                /**
-                 *Find a better way to thread. Avoid Thread.sleep();
-                 */
-                // delay the loop by 500 milliseconds so the user can track the runner's path visually
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
             }
-            return score;
+
+            // move the runner left when the direction says east from his position
+            else if (path.get(count).trim().equals("East")) {
+                int[] new_pos = Runner_Movement.moveRight(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                if (new_pos != null) {
+                    recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                    score = get_score(score, new_pos, environ_map);
+                    visited_cells.add(new_pos);
+                }
+            }
+
+            // move the runner down when the direction says south from his position
+            else if (path.get(count).trim().equals("South")) {
+                int[] new_pos = Runner_Movement.moveDown(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                if (new_pos != null) {
+                    recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                    score = get_score(score, new_pos, environ_map);
+                    visited_cells.add(new_pos);
+                }
+            }
+
+            // move the runner left when the direction says west from his position
+            else if (path.get(count).trim().equals("West")) {
+                int[] new_pos = Runner_Movement.moveLeft(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                if (new_pos != null) {
+                    recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                    score = get_score(score, new_pos, environ_map);
+                    visited_cells.add(new_pos);
+                }
+            }
+
+            // move the runner north east when the directions says north east
+            else if (path.get(count).trim().equals("North East")) {
+                int[] new_pos = Runner_Movement.moveNorthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                if (new_pos != null) {
+                    recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                    score = get_score(score, new_pos, environ_map);
+                    visited_cells.add(new_pos);
+                }
+            }
+
+            // move the runner north west when the directions says north west
+            else if (path.get(count).trim().equals("North West")) {
+                int[] new_pos = Runner_Movement.moveNorthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                if (new_pos != null) {
+                    recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                    score = get_score(score, new_pos, environ_map);
+                    visited_cells.add(new_pos);
+                }
+            }
+
+            // move the runner south east when the directions says south east
+            else if (path.get(count).trim().equals("South East")) {
+                int[] new_pos = Runner_Movement.moveSouthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                if (new_pos != null) {
+                    recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                    score = get_score(score, new_pos, environ_map);
+                    visited_cells.add(new_pos);
+                }
+            }
+
+            // move the runner south west when the directions says south west
+            else if (path.get(count).trim().equals("South West")) {
+                int[] new_pos = Runner_Movement.moveSouthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
+                if (new_pos != null) {
+                    recent_moves.push(visited_cells.get(visited_cells.size() - 1));
+                    score = get_score(score, new_pos, environ_map);
+                    visited_cells.add(new_pos);
+                }
+            }
+
+        return score;
     }
 
     /**
@@ -1274,4 +1539,8 @@ public class Environment extends Application {
         }
         return score;
     }
+
+
+    // Used the function in Runner Movement instead. Passed in the image dict with original images instead of the alt images dict
+
 }
