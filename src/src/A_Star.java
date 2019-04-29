@@ -1,7 +1,13 @@
+import javafx.scene.control.Cell;
 import javafx.scene.image.Image;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 // A_Star
@@ -105,8 +111,9 @@ public class A_Star {
      Auxiliary Space: O(N)
      */
     // function to construct the path the runner took after reaching the goal
-    public static void write_constructedPath(Cell_Node node, Cell_Node start, Cell_Node goal) throws IOException {
+    public static ArrayList<String> write_constructedPath(Cell_Node node, Cell_Node start, Cell_Node goal) throws IOException {
         ArrayList<Cell_Node> total_path = new ArrayList<>();
+        ArrayList<String> runner_path_from_start = new ArrayList<>();
         total_path.add(node);
 
         while(node.parent != null){
@@ -115,10 +122,14 @@ public class A_Star {
         }
 
         // path to the output file
-        String path = "C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\output_runner_path.txt";
+        String path = "C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\Output Files\\output_" + new SimpleDateFormat("yyyy-MM-dd HH.mm").format(new Date()) + ".txt";
+
+        File output_file = new File(path);
+        output_file.createNewFile();
 
         // write to the output file
-        FileWriter bufferedWriter = new FileWriter(path);
+        FileWriter bufferedWriter = new FileWriter(output_file);
+
 
         // output Start and the coordinates of the start node
         bufferedWriter.write("Start ");
@@ -169,6 +180,7 @@ public class A_Star {
             // print to screen the direction the road runner took and write it to file
             System.out.println(direction);
             bufferedWriter.append(direction + "\n");
+            runner_path_from_start.add(String.valueOf(direction));
         }
 
         bufferedWriter.close();
@@ -177,68 +189,16 @@ public class A_Star {
         for(Cell_Node node1: total_path){
             System.out.println(Arrays.toString(node1.posOnGrid));
         }
+        return runner_path_from_start;
     }
 
-    /**
-     Time Complexity: O(N^2)
-     Space Complexity: O(N^2)
-     Auxiliary Space: O(N)
-     */
-    // function to trace the runner's shortest path using A* algorithm to the goal with only four directions to take from a node
-    @SuppressWarnings("Duplicates")
-    public static void A_StarSearch_4D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image> image_dict) throws IOException {
-        // get the goal position on the grid
-        int[] goal_pos = identify_CellPos(goal, grid_nodes);
-
-        // get the start position on the grid
-        int[] start_pos = identify_CellPos(start, grid_nodes);
-
-
-        // check if the goal cell is valid
-        if(!cell_isValid(grid_nodes, goal_pos[0], goal_pos[1])){
-            System.out.println("Goal Cell Not Valid");
-        }
-
-        // check if the start node is valid
-        if(!cell_isValid(grid_nodes, start_pos[0], start_pos[1])){
-            System.out.println("Start Cell Not Valid");
-        }
-
-        // check if the goal is blocked. i.e is a boulder
-        if(cell_isBlocked(grid_nodes, goal_pos[0], goal_pos[1], image_dict)){
-            System.out.println("Goal Cell is Blocked");
-        }
-
-        // check if the start is blocked i.e is a boulder
-        if(cell_isBlocked(grid_nodes, start_pos[0], start_pos[1], image_dict)){
-            System.out.println("Start Cell is Blocked");
-        }
-
-        // check if the start node is our destination. if so, then we are already at our destination
-        if(cell_isDestination(grid_nodes, start_pos[0], start_pos[1], image_dict)){
-            System.out.println("We are Already at out Destination");
-        }
-
-        // create a set to store all the visited nodes in the grid
-        Set<Cell_Node> closedSet = new HashSet<>();
-
-        // create a set to store all the unvisited nodes in the grid
-        Set<Cell_Node> openSet = new HashSet<>();
-
-        // initialize the unvisited set with the start node
-        openSet.add(start);
-
-        // variable to check if we've reached our destination
-        boolean foundDestination = false;
-
-        HashMap<Cell_Node, Cell_Node> cameFromPath = new HashMap<>();
-
-        // loop to update all grid nodes g and f scores with positive infinity.
-        // update the nodes with their valid neighbours i.e coordinates are within the grid and are not blocked.
+    // loop to update all grid nodes g and f scores with positive infinity.
+    // update the nodes with their valid neighbours(4 max) i.e coordinates are within the grid and are not blocked.
+    public static void set4Neighbours(Cell_Node[][] grid_nodes, HashMap<Integer,Image> image_dict){
         for(int i=0; i < grid_nodes.length; i++){
             for(int j=0; j < grid_nodes[i].length; j++){
-                    grid_nodes[i][j].setfScore((int) Double.POSITIVE_INFINITY);
-                    grid_nodes[i][j].setgScore((int) Double.POSITIVE_INFINITY);
+                grid_nodes[i][j].setfScore((int) Double.POSITIVE_INFINITY);
+                grid_nodes[i][j].setgScore((int) Double.POSITIVE_INFINITY);
 
                 if(cell_isValid(grid_nodes, i-1, j) && !cell_isBlocked(grid_nodes, i-1, j, image_dict)){
                     grid_nodes[i][j].addNeighbours(grid_nodes[i-1][j]);
@@ -254,6 +214,103 @@ public class A_Star {
                 }
             }
         }
+    }
+
+    // loop to update all grid nodes g and f scores with positive infinity.
+    // update the nodes with their valid neighbours (8 max) i.e coordinates are within the grid and are not blocked.
+    public static void set8Neighbours(Cell_Node[][] grid_nodes, HashMap<Integer,Image> image_dict){
+        for(int i=0; i < grid_nodes.length; i++){
+            for(int j=0; j < grid_nodes[i].length; j++){
+//                grid_nodes[i][j].setfScore((int) Double.POSITIVE_INFINITY);
+//                grid_nodes[i][j].setgScore((int) Double.POSITIVE_INFINITY);
+
+                if(cell_isValid(grid_nodes,i-1, j-1) && !cell_isBlocked(grid_nodes, i-1, j-1, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i-1][j-1]);
+                }
+                if(cell_isValid(grid_nodes, i-1, j) && !cell_isBlocked(grid_nodes, i-1, j, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i-1][j]);
+                }
+                if(cell_isValid(grid_nodes, i-1, j+1) && !cell_isBlocked(grid_nodes, i-1, j+1, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i-1][j+1]);
+                }
+                if(cell_isValid(grid_nodes, i, j-1) && !cell_isBlocked(grid_nodes, i, j-1, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j-1]);
+                }
+                if(cell_isValid(grid_nodes, i, j+1) && !cell_isBlocked(grid_nodes, i, j+1, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j+1]);
+                }
+                if(cell_isValid(grid_nodes, i+1, j-1) && !cell_isBlocked(grid_nodes, i+1, j-1, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i+1][j-1]);
+                }
+                if(cell_isValid(grid_nodes, i+1, j) && !cell_isBlocked(grid_nodes, i+1, j, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i+1][j]);
+                }
+                if(cell_isValid(grid_nodes, i+1, j+1) && !cell_isBlocked(grid_nodes, i+1, j+1, image_dict)){
+                    grid_nodes[i][j].addNeighbours(grid_nodes[i+1][j+1]);
+                }
+            }
+        }
+    }
+
+
+    /**
+     Time Complexity: O(N^2)
+     Space Complexity: O(N^2)
+     Auxiliary Space: O(N)
+     */
+    // function to trace the runner's shortest path using A* algorithm to the goal with only four directions to take from a node
+    @SuppressWarnings("Duplicates")
+    public static ArrayList<String> A_StarSearch_4D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image> image_dict) throws IOException {
+        // get the goal position on the grid
+        int[] goal_pos = identify_CellPos(goal, grid_nodes);
+
+        // get the start position on the grid
+        int[] start_pos = identify_CellPos(start, grid_nodes);
+
+
+        // check if the goal cell is valid
+        if(!cell_isValid(grid_nodes, goal_pos[0], goal_pos[1])){
+            System.out.println("Goal Cell Not Valid");
+            return null;
+        }
+
+        // check if the start node is valid
+        if(!cell_isValid(grid_nodes, start_pos[0], start_pos[1])){
+            System.out.println("Start Cell Not Valid");
+            return null;
+        }
+
+        // check if the goal is blocked. i.e is a boulder
+        if(cell_isBlocked(grid_nodes, goal_pos[0], goal_pos[1], image_dict)){
+            System.out.println("Goal Cell is Blocked");
+            return null;
+        }
+
+        // check if the start is blocked i.e is a boulder
+        if(cell_isBlocked(grid_nodes, start_pos[0], start_pos[1], image_dict)){
+            System.out.println("Start Cell is Blocked");
+            return null;
+        }
+
+        // check if the start node is our destination. if so, then we are already at our destination
+        if(cell_isDestination(grid_nodes, start_pos[0], start_pos[1], image_dict)){
+            System.out.println("We are Already at out Destination");
+            return null;
+        }
+
+        // create a set to store all the visited nodes in the grid
+        Set<Cell_Node> closedSet = new HashSet<>();
+
+        // create a set to store all the unvisited nodes in the grid
+        Set<Cell_Node> openSet = new HashSet<>();
+
+        // initialize the unvisited set with the start node
+        openSet.add(start);
+
+        // variable to check if we've reached our destination
+        boolean foundDestination = false;
+
+        set4Neighbours(grid_nodes, image_dict);
 
         // initialize the start node's gscore as 0
         start.setgScore(0);
@@ -277,6 +334,10 @@ public class A_Star {
                 }
             }
 
+            if(current == null){
+                break;
+            }
+
             // get the current node's position on the grid
             int[] current_pos = identify_CellPos(current, grid_nodes);
             current.posOnGrid = current_pos;
@@ -284,8 +345,9 @@ public class A_Star {
 
 //            If current is our goal write the constructed path and set our foundDestination variable to true
             if(cell_isDestination(grid_nodes, current_pos[0], current_pos[1], image_dict)){
-                write_constructedPath(current, start, goal);
                 foundDestination = true;
+                return write_constructedPath(current, start, goal);
+
             }
 
             // remove the current from the open set
@@ -346,6 +408,7 @@ public class A_Star {
         if(openSet.isEmpty() && !foundDestination){
             System.out.println("Could Not Find the Destination");
         }
+        return null;
 
     }
 
@@ -356,29 +419,34 @@ public class A_Star {
      */
     // function to trace the runner's shortest path using A* algorithm to the goal with only eight directions to take from a node
     @SuppressWarnings("Duplicates")
-    public static void A_StarSearch_8D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image> image_dict) throws IOException {
+    public static ArrayList<String> A_StarSearch_8D(Cell_Node[][] grid_nodes, Cell_Node start, Cell_Node goal, HashMap<Integer,Image> image_dict) throws IOException {
         int[] goal_pos = identify_CellPos(goal, grid_nodes);
         int[] start_pos = identify_CellPos(start, grid_nodes);
 
 
         if(!cell_isValid(grid_nodes, goal_pos[0], goal_pos[1])){
             System.out.println("Goal Cell Not Valid");
+            return null;
         }
 
         if(!cell_isValid(grid_nodes, start_pos[0], start_pos[1])){
             System.out.println("Start Cell Not Valid");
+            return null;
         }
 
         if(cell_isBlocked(grid_nodes, goal_pos[0], goal_pos[1], image_dict)){
             System.out.println("Goal Cell is Blocked");
+            return null;
         }
 
         if(cell_isBlocked(grid_nodes, start_pos[0], start_pos[1], image_dict)){
             System.out.println("Start Cell is Blocked");
+            return null;
         }
 
         if(cell_isDestination(grid_nodes, start_pos[0], start_pos[1], image_dict)){
             System.out.println("We are Already at out Destination");
+            return null;
         }
 
 
@@ -388,44 +456,11 @@ public class A_Star {
 
         boolean foundDestination = false;
 
-        HashMap<Cell_Node, Cell_Node> cameFromPath = new HashMap<>();
+        set8Neighbours(grid_nodes, image_dict);
 
         start.setgScore(0);
         start.setH(calculateHeuristic_8D(start_pos[0], start_pos[1], goal, grid_nodes));
         start.setfScore(start.getgScore() + start.getH());
-
-        goal.setgScore(0);
-        goal.setfScore(0);
-
-        for(int i=0; i < grid_nodes.length; i++){
-            for(int j=0; j < grid_nodes[i].length; j++){
-
-                if(cell_isValid(grid_nodes,i-1, j-1) && !cell_isBlocked(grid_nodes, i-1, j-1, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i-1][j-1]);
-                }
-                if(cell_isValid(grid_nodes, i-1, j) && !cell_isBlocked(grid_nodes, i-1, j, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i-1][j]);
-                }
-                if(cell_isValid(grid_nodes, i-1, j+1) && !cell_isBlocked(grid_nodes, i-1, j+1, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i-1][j+1]);
-                }
-                if(cell_isValid(grid_nodes, i, j-1) && !cell_isBlocked(grid_nodes, i, j-1, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j-1]);
-                }
-                if(cell_isValid(grid_nodes, i, j+1) && !cell_isBlocked(grid_nodes, i, j+1, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i][j+1]);
-                }
-                if(cell_isValid(grid_nodes, i+1, j-1) && !cell_isBlocked(grid_nodes, i+1, j-1, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i+1][j-1]);
-                }
-                if(cell_isValid(grid_nodes, i+1, j) && !cell_isBlocked(grid_nodes, i+1, j, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i+1][j]);
-                }
-                if(cell_isValid(grid_nodes, i+1, j+1) && !cell_isBlocked(grid_nodes, i+1, j+1, image_dict)){
-                    grid_nodes[i][j].addNeighbours(grid_nodes[i+1][j+1]);
-                }
-            }
-        }
 
 
         while(!openSet.isEmpty()){
@@ -439,14 +474,19 @@ public class A_Star {
                 }
             }
 
+            if(current == null){
+                break;
+            }
+
             int[] current_pos = identify_CellPos(current, grid_nodes);
             current.posOnGrid = current_pos;
 
 
             // If current is our goal return the constructed path
             if(cell_isDestination(grid_nodes, current_pos[0], current_pos[1], image_dict)){
-                write_constructedPath(current, start, goal);
                 foundDestination = true;
+                return write_constructedPath(current, start, goal);
+
             }
 
             openSet.remove(current);
@@ -477,7 +517,6 @@ public class A_Star {
                     continue;
                 }
 
-                cameFromPath.put(neighbour, current);
                 neighbour.parent = current;
                 neighbour.setgScore(temp_gScore);
                 neighbour.setH(calculateHeuristic_8D(neighbour_pos[0], neighbour_pos[1], goal, grid_nodes));
@@ -488,7 +527,7 @@ public class A_Star {
         if(openSet.isEmpty() && !foundDestination){
             System.out.println("Could Not Find the Destination");
         }
-
+        return  null;
     }
 
 }
