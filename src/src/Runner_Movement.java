@@ -17,6 +17,8 @@ public class Runner_Movement {
         return map.get(x)[y] == 1;
     }
 
+//    public static boolean is_Destination(int x, int y, )
+
     /**
      Time Complexity: O(1)
      Space Complexity: O(N)
@@ -27,8 +29,8 @@ public class Runner_Movement {
         Integer image_to_replace_key = map.get(x)[y];
 
         ImageView alt_image = new ImageView(image_alt_dict.get(image_to_replace_key));
-        alt_image.setFitWidth(100);
-        alt_image.setFitHeight(100);
+        alt_image.setFitWidth(20);
+        alt_image.setFitHeight(20);
         grid.getChildren().remove(runner);
         grid.add(alt_image, y, x);
         grid_nodes[x][y] = new Cell_Node(alt_image);
@@ -69,6 +71,7 @@ public class Runner_Movement {
                     replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos, grid_nodes);
                     runner_xpos -= 1;
                     grid.add(runner, runner_ypos, runner_xpos);
+
                     return new int[]{runner_xpos, runner_ypos};
                 }
             }
@@ -91,11 +94,6 @@ public class Runner_Movement {
         int runner_ypos = Environment.getRunner_Ypos(runner);
 
         if(runner_xpos < map.size() - 1){
-//            replace_image(grid, runner, map, image_alt_dict, runner_xpos, runner_ypos);
-//            runner_xpos += 1;
-
-//            next_cell_pos = new int[]{runner_xpos + 1, runner_ypos};
-
             if(runner_has_visited_cell(runner_xpos + 1, runner_ypos, visited_cells)){
                 System.out.println("Runner has already visited this cell");
             }
