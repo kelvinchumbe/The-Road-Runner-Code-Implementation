@@ -338,7 +338,7 @@ public class A_Star {
                 break;
             }
 
-            // get the current node's position on the grid
+            /// get the current node's position on the grid
             int[] current_pos = identify_CellPos(current, grid_nodes);
             current.posOnGrid = current_pos;
 
