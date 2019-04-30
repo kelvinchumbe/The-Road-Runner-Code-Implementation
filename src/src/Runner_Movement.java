@@ -56,7 +56,7 @@ public class Runner_Movement {
      Space Complexity: O(N)
      Auxiliary Space: O(1)
      */
-    // function to move the runner up on the grid
+    /// function to move the runner up on the grid
     @SuppressWarnings("Duplicates")
     public static int[] moveUp(GridPane grid, ImageView runner, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> map, ArrayList<int[]> visited_cells, Cell_Node[][] grid_nodes){
         int runner_xpos = Environment.getRunner_Xpos(runner);
