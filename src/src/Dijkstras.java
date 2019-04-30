@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.*;
 
 // dijkstras
-// Methods used to determine validity of some aspects have been borrowed from static methods in the A_Star class
+/// Methods used to determine validity of some aspects have been borrowed from static methods in the A_Star class
 public class Dijkstras {
     public static void setEnergyCosts(Cell_Node[][] grid_nodes, HashMap<Integer, Image> image_dict, HashMap<Integer,Integer> weight_dict){
         for(int i=0; i < grid_nodes.length; i++){
