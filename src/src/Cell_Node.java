@@ -25,7 +25,7 @@ public class Cell_Node {
     // node's parent
     Cell_Node parent;
 
-    // node's energy cost. Is instrumental when implementing the runners path using dijkstra's algorithm
+    /// node's energy cost. Is instrumental when implementing the runners path using dijkstra's algorithm
     int energy_cost;
 
     public Cell_Node(ImageView view){
