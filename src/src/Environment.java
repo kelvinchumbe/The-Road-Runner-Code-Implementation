@@ -221,7 +221,7 @@ public class Environment extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Road Runner Simulation");
 
-        File file_name = new File("C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\The Road Runner Files\\Test Inputs\\sample_test_input_1.txt");
+        File file_name = new File("C:\\Users\\Kelvin Kinda\\IdeaProjects\\pp-ii-the-road-runner-kelvin-judith\\src\\src\\Test Files\\test_input_10_15_unsolvable.txt");
 
         // read and store contents of the file in an arraylist of arrays
         environ_map = readfile(file_name);
@@ -436,29 +436,29 @@ public class Environment extends Application {
                     //check if there has been 3 undos. If so disable the undo button and enable the undo button
                     if (count_undos == 3) {
                         undo.setDisable(true);
-//                        redo.setDisable(false);
+                        redo.setDisable(false);
                         System.out.println("No Legal Undos left");
                     }
 
                     // undo the scores by reversing them.
                     switch (environ_map.get(undone_move[0])[undone_move[1]]) {
                         case 0:
-                            score += 1;
+                            score -= weights_dict.get(0);
                             break;
                         case 2:
-                            score += 2;
+                            score -= weights_dict.get(2);
                             break;
                         case 3:
-                            score += 4;
+                            score -= weights_dict.get(3);
                             break;
                         case 4:
-                            score += 8;
+                            score -= weights_dict.get(4);
                             break;
                         case 5:
-                            score -= 1;
+                            score -= weights_dict.get(5);
                             break;
                         case 6:
-                            score -= 5;
+                            score -= weights_dict.get(6);
                             break;
                     }
                     // update the score label with the new scores
@@ -528,6 +528,7 @@ public class Environment extends Application {
                 // if the last action was move up, redo the move up action
                 else if (recent_action.equals("up")) {
                     undo.setDisable(false);
+                    redo.setDisable(false);
                     redone = Runner_Movement.moveUp(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
@@ -535,6 +536,7 @@ public class Environment extends Application {
                     }
                 } else if (recent_action.equals("down")) {
                     undo.setDisable(false);
+                    redo.setDisable(false);
                     redone = Runner_Movement.moveDown(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
@@ -542,6 +544,7 @@ public class Environment extends Application {
                     }
                 } else if (recent_action.equals("left")) {
                     undo.setDisable(false);
+                    redo.setDisable(false);
                     redone = Runner_Movement.moveLeft(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
@@ -549,6 +552,7 @@ public class Environment extends Application {
                     }
                 } else if (recent_action.equals("right")) {
                     undo.setDisable(false);
+                    redo.setDisable(false);
                     redone = Runner_Movement.moveRight(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
@@ -557,6 +561,7 @@ public class Environment extends Application {
                 }
                 else if(recent_action.equals("north east")){
                     undo.setDisable(false);
+                    redo.setDisable(false);
                     redone = Runner_Movement.moveNorthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
@@ -566,6 +571,7 @@ public class Environment extends Application {
 
                 else if(recent_action.equals("south east")){
                     undo.setDisable(false);
+                    redo.setDisable(false);
                     redone = Runner_Movement.moveSouthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
@@ -575,6 +581,7 @@ public class Environment extends Application {
 
                 else if(recent_action.equals("north west")){
                     undo.setDisable(false);
+                    redo.setDisable(false);
                     redone = Runner_Movement.moveNorthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
@@ -584,6 +591,7 @@ public class Environment extends Application {
 
                 else if(recent_action.equals("south west")){
                     undo.setDisable(false);
+                    redo.setDisable(false);
                     redone = Runner_Movement.moveSouthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                     if (redone != null) {
                         recent_moves.push(visited_cells.get(visited_cells.size() - 1));
@@ -591,10 +599,33 @@ public class Environment extends Application {
                     }
                 }
 
-                score = get_score(score, redone, environ_map);
+                score = get_score(score, redone, environ_map, weights_dict);
                 score_label.setText("SCORE: " + score);
             }
         });
+
+        Timeline dijkstraTimeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
+            score = move_with_algorithm(grid, roadrunner,goal, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score, count, weights_dict);
+            count += 1;
+            score_label.setText("SCORE: " + score);
+        })
+        );
+
+        Timeline astarTimeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
+            score = move_with_algorithm(grid, roadrunner, goal, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score, count, weights_dict);
+            count += 1;
+            score_label.setText("SCORE: " + score);
+        })
+        );
+
+        Timeline dfsTimeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
+            score = move_with_algorithm(grid, roadrunner, goal, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score, count, weights_dict);
+            count += 1;
+            score_label.setText("SCORE: " + score);
+
+        })
+        );
+
 
         // define what happens when the reset button is clicked
         reset.setOnAction(new EventHandler<ActionEvent>() {
@@ -618,6 +649,11 @@ public class Environment extends Application {
                 clicked_pos = null;
                 start_isClicked = false;
                 path = null;
+
+                dfsTimeline.stop();
+                astarTimeline.stop();
+                dijkstraTimeline.stop();
+
 
                 // delete all images from the grid before adding new Imageviews
                 grid.getChildren().removeAll();
@@ -726,12 +762,9 @@ public class Environment extends Application {
         Button solve_dfs = new Button("Solve with DFS");
 
 
-        Timeline astarTimeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
-            score = move_with_algorithm(grid, roadrunner, goal, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score, count, goal_isReached);
-            count += 1;
-            score_label.setText("SCORE: " + score);
-            })
-        );
+
+
+
 
         solve_A_star.setOnAction(new EventHandler<ActionEvent>() {
             @SuppressWarnings("Duplicates")
@@ -769,12 +802,7 @@ public class Environment extends Application {
         });
 
 
-        Timeline dijkstraTimeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
-            score = move_with_algorithm(grid, roadrunner,goal, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score, count, goal_isReached);
-            count += 1;
-            score_label.setText("SCORE: " + score);
-        })
-        );
+
 
         solve_dijkstra.setOnAction(new EventHandler<ActionEvent>() {
             @SuppressWarnings("Duplicates")
@@ -810,13 +838,7 @@ public class Environment extends Application {
         });
 
 
-        Timeline dfsTimeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
-            score = move_with_algorithm(grid, roadrunner, goal, image_alt_dict, environ_map, visited_cells, recent_moves, path, grid_nodes, score, count, goal_isReached);
-            count += 1;
-            score_label.setText("SCORE: " + score);
 
-            })
-        );
 
         solve_dfs.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -882,9 +904,14 @@ public class Environment extends Application {
 //
 //                String file_path = scanner.nextLine();
 
+                grid.getChildren().removeAll();
+
                 FileChooser fileChooser = new FileChooser();
 
                 File load_file = fileChooser.showOpenDialog(primaryStage);
+
+                environ_map = null;
+                grid_nodes = null;
 
                 if(load_file != null){
                     try {
@@ -901,6 +928,9 @@ public class Environment extends Application {
                     redo_recent_moves = new Stack<>();
                     recent_action = null;
                     score = 0;
+
+
+
 
                     for(int i=0; i < environ_map.size(); i++){
                         for(int j=0; j < environ_map.get(i).length; j++){
@@ -1323,7 +1353,7 @@ public class Environment extends Application {
                         }
                     }
 
-                    score = get_score(score, new_pos, environ_map);
+                    score = get_score(score, new_pos, environ_map, weights_dict);
                     score_label.setText("SCORE: " + score);
 
                 }
@@ -1415,7 +1445,7 @@ public class Environment extends Application {
      Auxiliary Space: O(N)
      */
     // function to move the runner on the grid based on the path determined by the algorithms defined above. Returns the score of the route
-    public static int move_with_algorithm(GridPane grid, ImageView roadrunner, ImageView goal, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> environ_map, ArrayList<int[]> visited_cells, Stack<int[]> recent_moves, ArrayList<String> path, Cell_Node[][] grid_nodes, int score, int count, boolean goal_isReached){
+    public static int move_with_algorithm(GridPane grid, ImageView roadrunner, ImageView goal, HashMap<Integer,Image> image_alt_dict, ArrayList<int[]> environ_map, ArrayList<int[]> visited_cells, Stack<int[]> recent_moves, ArrayList<String> path, Cell_Node[][] grid_nodes, int score, int count, HashMap<Integer,Integer> weights_dict){
 
             // move the runner up when the direction says north from his position
             if (path.get(count).trim().equals("North")) {
@@ -1427,7 +1457,7 @@ public class Environment extends Application {
                     recent_moves.push(visited_cells.get(visited_cells.size() - 1));
 
                     // update the score
-                    score = get_score(score, new_pos, environ_map);
+                    score = get_score(score, new_pos, environ_map, weights_dict);
 
                     // add his new position in the visited cells
                     visited_cells.add(new_pos);
@@ -1441,7 +1471,7 @@ public class Environment extends Application {
                 int[] new_pos = Runner_Movement.moveRight(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                 if (new_pos != null) {
                     recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                    score = get_score(score, new_pos, environ_map);
+                    score = get_score(score, new_pos, environ_map, weights_dict);
                     visited_cells.add(new_pos);
                 }
             }
@@ -1451,7 +1481,7 @@ public class Environment extends Application {
                 int[] new_pos = Runner_Movement.moveDown(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                 if (new_pos != null) {
                     recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                    score = get_score(score, new_pos, environ_map);
+                    score = get_score(score, new_pos, environ_map, weights_dict);
                     visited_cells.add(new_pos);
                 }
             }
@@ -1461,7 +1491,7 @@ public class Environment extends Application {
                 int[] new_pos = Runner_Movement.moveLeft(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                 if (new_pos != null) {
                     recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                    score = get_score(score, new_pos, environ_map);
+                    score = get_score(score, new_pos, environ_map, weights_dict);
                     visited_cells.add(new_pos);
                 }
             }
@@ -1471,7 +1501,7 @@ public class Environment extends Application {
                 int[] new_pos = Runner_Movement.moveNorthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                 if (new_pos != null) {
                     recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                    score = get_score(score, new_pos, environ_map);
+                    score = get_score(score, new_pos, environ_map, weights_dict);
                     visited_cells.add(new_pos);
                 }
             }
@@ -1481,7 +1511,7 @@ public class Environment extends Application {
                 int[] new_pos = Runner_Movement.moveNorthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                 if (new_pos != null) {
                     recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                    score = get_score(score, new_pos, environ_map);
+                    score = get_score(score, new_pos, environ_map, weights_dict);
                     visited_cells.add(new_pos);
                 }
             }
@@ -1491,7 +1521,7 @@ public class Environment extends Application {
                 int[] new_pos = Runner_Movement.moveSouthEast(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                 if (new_pos != null) {
                     recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                    score = get_score(score, new_pos, environ_map);
+                    score = get_score(score, new_pos, environ_map, weights_dict);
                     visited_cells.add(new_pos);
                 }
             }
@@ -1501,7 +1531,7 @@ public class Environment extends Application {
                 int[] new_pos = Runner_Movement.moveSouthWest(grid, roadrunner, image_alt_dict, environ_map, visited_cells, grid_nodes);
                 if (new_pos != null) {
                     recent_moves.push(visited_cells.get(visited_cells.size() - 1));
-                    score = get_score(score, new_pos, environ_map);
+                    score = get_score(score, new_pos, environ_map, weights_dict);
                     visited_cells.add(new_pos);
                 }
             }
@@ -1514,26 +1544,26 @@ public class Environment extends Application {
      Space Complexity: O(N)
      Auxiliary Space: O(N)
      */
-    public static int get_score(int score, int[] new_pos, ArrayList<int[]> map) {
+    public static int get_score(int score, int[] new_pos, ArrayList<int[]> map, HashMap<Integer,Integer> weights_dict) {
         if (new_pos != null) {
             switch (map.get(new_pos[0])[new_pos[1]]) {
                 case 0:
-                    score -= 1;
+                    score += weights_dict.get(0);
                     break;
                 case 2:
-                    score -= 2;
+                    score += weights_dict.get(2);
                     break;
                 case 3:
-                    score -= 4;
+                    score += weights_dict.get(3);
                     break;
                 case 4:
-                    score -= 8;
+                    score += weights_dict.get(4);
                     break;
                 case 5:
-                    score += 1;
+                    score += weights_dict.get(5);
                     break;
                 case 6:
-                    score += 5;
+                    score += weights_dict.get(6);
                     break;
             }
         }
