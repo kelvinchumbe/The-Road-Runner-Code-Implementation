@@ -31,7 +31,7 @@ This is an code implementation of the Road Runner inspired by Looney Tunes' "The
      - Gold road => +5
 
  6. **Reset (reset the environment to its initial state)**
- 7. **Autonomous path finding (Implemented in A*, Djikstra and DFS algorithms)**
+ 7. **Autonomous path finding (Implemented in A-star, Djikstra and DFS algorithms)**
  8. **Output resulting path to file**
  9. **Set a new start from the default on in the environment or in the file read**
  
@@ -41,9 +41,12 @@ The project implements 3 graph search algorithms:
   * Dijkstra's Algorithm
   * Depth First Search (DFS)
   
-**A* Algorithm** finds the shortest path from a start point to the goal ignoring all weights.
+**A-star Algorithm** finds the shortest path from a start point to the goal ignoring all weights.
+
 **Dijkstra's Algorithm** finds the shortest path from a start to a goal in weighted graphs.
+
 **Depth First Search algorithm** does not necessarily find the shortest path. It only returns the first valid path it comes across while ignoring the weights.
+
 
 The program uses multithreading to implement a moving Road Runner when a valid path is found. An alert is displayed on the console if no valid path was found to the goal
 
