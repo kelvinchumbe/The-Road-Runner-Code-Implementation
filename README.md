@@ -54,7 +54,11 @@ The program uses multithreading to implement a moving Road Runner when a valid p
 When the algorithms are run, they output the discovered paths to file.
 
 ## Sample Solution
-1. ![Path found on 4 directional movement by the Road Runner on the Grand Scale map by the Dijkstra algorithm](https://user-images.githubusercontent.com/43356490/82752757-0371d300-9dc9-11ea-8ec8-ebcb625966a8.png)
+1. Path found on 4 directional movement by the Road Runner on the Grand Scale map by the Dijkstra algorithm .
+
+![Path found on 4 directional movement by the Road Runner on the Grand Scale map by the Dijkstra algorithm](https://user-images.githubusercontent.com/43356490/82752757-0371d300-9dc9-11ea-8ec8-ebcb625966a8.png)
 
 
-2. ![Path found on 8 directional movement by the Road Runner on the Grand Scale map by the A* algorithm](https://user-images.githubusercontent.com/43356490/82752826-7418ef80-9dc9-11ea-8203-3d57bd890518.png)
+2. Path found on 8 directional movement by the Road Runner on the Grand Scale map by the A* algorithm.
+
+![Path found on 8 directional movement by the Road Runner on the Grand Scale map by the A* algorithm](https://user-images.githubusercontent.com/43356490/82752826-7418ef80-9dc9-11ea-8203-3d57bd890518.png)
