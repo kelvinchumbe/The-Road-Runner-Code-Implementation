@@ -1,0 +1,33 @@
+Start 18 1 
+Goal 2 12 
+North 
+North 
+North 
+North 
+North 
+North 
+North 
+North 
+East
+East
+East
+North 
+North 
+East
+East
+East
+North 
+North 
+North 
+East
+North 
+East
+North 
+East
+North 
+North 
+East
+North 
+East
+South 
+South 

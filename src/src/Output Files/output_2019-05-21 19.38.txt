@@ -1,0 +1,48 @@
+Start 11 7 
+Goal 10 38 
+North West
+North West
+South West
+West
+South West
+South West
+South 
+South 
+South East
+South East
+South East
+East
+East
+North East
+North East
+East
+East
+North East
+North East
+North East
+North 
+North East
+North East
+North East
+East
+South East
+East
+South East
+East
+East
+South East
+North East
+North East
+East
+East
+South East
+South East
+East
+East
+South East
+South East
+North East
+North East
+North East
+North East
+South East

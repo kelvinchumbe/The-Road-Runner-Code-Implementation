@@ -1,0 +1,9 @@
+Start 2 13 
+Goal 8 12 
+South 
+South 
+South 
+South 
+South 
+South 
+West

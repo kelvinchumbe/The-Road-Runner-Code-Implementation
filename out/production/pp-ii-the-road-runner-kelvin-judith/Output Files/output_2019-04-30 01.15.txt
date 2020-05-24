@@ -1,0 +1,9 @@
+Start 3 1 
+Goal 0 3 
+West
+North 
+North 
+East
+East
+North 
+East

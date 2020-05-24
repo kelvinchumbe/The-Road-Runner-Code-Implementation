@@ -600,7 +600,7 @@ public class Environment extends Application {
                 }
 
                 score = get_score(score, redone, environ_map, weights_dict);
-                score_label.setText("SCORE: " + score);
+                         score_label.setText("SCORE: " + score);
             }
         });
 

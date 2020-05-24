@@ -1,0 +1,10 @@
+Start 4 5 
+Goal 6 13 
+East
+East
+North East
+East
+South East
+South East
+East
+South East

@@ -1,0 +1,21 @@
+Start 0 1 
+Goal 8 12 
+South 
+East
+East
+East
+South 
+East
+East
+East
+South 
+East
+South 
+East
+South 
+South 
+East
+East
+East
+South 
+South 

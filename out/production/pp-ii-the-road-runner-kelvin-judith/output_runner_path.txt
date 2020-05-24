@@ -1,0 +1,24 @@
+Start 2 4 
+Goal 2 10 
+West
+West
+West
+South 
+South 
+East
+East
+East
+East
+East
+East
+East
+East
+East
+East
+East
+East
+North 
+North 
+West
+West
+West

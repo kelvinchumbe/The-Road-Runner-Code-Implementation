@@ -1,0 +1,21 @@
+Start 0 0 
+Goal 6 13 
+East
+East
+East
+East
+East
+East
+East
+East
+East
+East
+South 
+South 
+South 
+East
+South 
+East
+South 
+South 
+East
