@@ -52,3 +52,6 @@ The program uses multithreading to implement a moving Road Runner when a valid p
 
 ## File Output
 When the algorithms are run, they output the discovered paths to file.
+
+## Sample Solution
+![Path found on 4 directional movement by the Road Runner on the Grand Scale map](https://user-images.githubusercontent.com/43356490/82752757-0371d300-9dc9-11ea-8ec8-ebcb625966a8.png)
